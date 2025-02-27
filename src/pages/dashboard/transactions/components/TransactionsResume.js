@@ -108,7 +108,7 @@ const TransactionsResume = ({ transactionsResume }) => {
                 <TransactionCardResume
                   icon={"fa-solid fa-money-bill"}
                   value={moneyFormater.format(transactionsResume.cashIncome.totalAmount)}
-                  message={"Recaudo" + "en Efectivo"}
+                  message={"Recaudo en Efectivo"}
                 />
               </div>
             </div>
@@ -117,7 +117,7 @@ const TransactionsResume = ({ transactionsResume }) => {
                 <TransactionCardResume
                   icon={"fa-solid fa-credit-card"}
                   value={moneyFormater.format(transactionsResume.cardIncome.totalAmount)}
-                  message={"Recaudo por \nTarjeta"}
+                  message={"Recaudo por Tarjeta"}
                 />
               </div>
             </div>
