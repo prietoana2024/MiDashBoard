@@ -1,6 +1,5 @@
 import axios from "axios";
 import { pki, util } from "node-forge";
-import userDto from "../Dto/usersDto";
 
 const GENERAL_HEADERS = {
   // eslint-disable-next-line no-undef
@@ -115,7 +114,7 @@ const create = async (user) => {
     headers: { ...GENERAL_HEADERS, Authorization: `Bearer ${token}` },
   };
   user.pwd = encryptPwd(user.pwd);
- console.log("user",user);
+  console.log("user",user);
   try {
     const responseObj = await axios.post("/api/User", user, config);
     //const userId = responseObj.data.response.id;
@@ -129,26 +128,6 @@ const create = async (user) => {
     throw error;
   }
 };
-
-/*************  ✨ Codeium Command 🌟  *************/
-
-/*const create = (user) => {
-  const token = window.localStorage.getItem("session");
-  const config = {
-    headers: { ...GENERAL_HEADERS, Authorization: `Bearer ${token}` },
-  };
-  user.pwd = encryptPwd(user.pwd);
-  
-  return axios.post("/api/User", user, config)
-    .then((responseObj) => {
-      // Extract user ID from the response
-      const userId = responseObj.data.response.id;
-      console.log("responseObj.datarId",responseObj);
-      console.log(responseObj.data.response.id);
-      // Immediately call assignOffices with the new user ID
-      return assignOffices(userId, oficinasSeleccionadasString);
-    });
-};*/
 
 const assignOffices = (userId, offices) => {
   console.log("userId", userId,"offices", offices);
@@ -344,84 +323,6 @@ const create = (userToSubmit, oficinasSeleccionadasString) => {
 };*/
 
 
-const create1 = (userToSubmit, oficinasSeleccionadasString) => {
-  const token = window.localStorage.getItem("session");
-  const config = {
-    headers: { 
-      ...GENERAL_HEADERS, 
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json' // Asegúrate de especificar este encabezado
-    }
-  };
-
-  const newUser = {...userToSubmit};
-  delete newUser.offices;
-  newUser.pwd = encryptPwd(userToSubmit.pwd);
-  
-  if (newUser) {
-    const requestData = {
-      newUser: newUser,
-      offices: oficinasSeleccionadasString
-    };
-  
-    console.log("Datos para creación:", requestData);
-  
-    return axios.post(
-      "/api/User/CreateAndAssignedOfficeAsync",
-      requestData, // Envía los datos como JSON
-      config
-    ).then((responseObj) => {
-      return responseObj.data;
-    }).catch((error) => {
-      // Manejo de errores aquí
-    });
-  } else {
-    console.error('No se pudo crear el objeto newUser');
-    return Promise.reject('Error al preparar los datos del usuario');
-  }
-};
-
-//oficinasSeleccionadasString
-/*
-const createUserAssigned = (user) => {
-  const token = window.localStorage.getItem("session");
-  const config = {
-    headers: { ...GENERAL_HEADERS, Authorization: `Bearer ${token}` },
-  };
-  user.pwd = encryptPwd(user.pwd);
-  return axios.post("/api/User/CreateAndAssignedOfficeAsync",user,offices,config).then((responseObj) => {
-    return responseObj.data;
-  });
-};*/
-//COMIENZA MI ADICION
-const createUserAssigned = (user, offices) => {
-  const token = window.localStorage.getItem("session");
-  const config = {
-    headers: { ...GENERAL_HEADERS, Authorization: `Bearer ${token}` },
-  };
-  
-  // Encripta la contraseña antes de enviarla
-  user.pwd = encryptPwd(user.pwd);
-
-  // Envía 'user' y 'offices' como parte del cuerpo de la petición
-  return axios.post("/api/User/CreateAndAssignedOfficeAsync", 
-    { ...user, offices }, // Aquí combinamos 'user' con 'offices'
-    config
-  ).then((responseObj) => {
-    return responseObj.data;
-  });
-};
-
-const updateUserAssigned = (user) => {
-  const token = window.localStorage.getItem("session");
-  const config = {
-    headers: { ...GENERAL_HEADERS, Authorization: `Bearer ${token}` },
-  };
-  return axios.put("/api/User/UpdateAndAssignedOfficeAsync",{ ...user, offices }, config).then((responseObj) => {
-    return responseObj.data;
-  });
-};
-
 const edit = (userToSubmit, oficinasSeleccionadasString) => {
   const token = window.localStorage.getItem("session");
   const config = {
@@ -453,11 +354,11 @@ const edit = (userToSubmit, oficinasSeleccionadasString) => {
     return responseObj.data;
   }).catch((error) => {
     if (error.response) {
-      throw new Error(error.response.data.message || 'Error en la actualización del usuario');
+      throw new Error(error.response.data.message || "Error en la actualización del usuario");
     } else if (error.request) {
-      throw new Error('No se recibió respuesta del servidor');
+      throw new Error("No se recibió respuesta del servidor");
     } else {
-      throw new Error('Error al realizar la petición');
+      throw new Error("Error al realizar la petición");
     }
   });
 };

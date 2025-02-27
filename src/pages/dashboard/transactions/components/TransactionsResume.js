@@ -29,16 +29,17 @@ const TransactionCardResume = (props) => {
   const calculateFontSize = () => {
     const screenWidth = window.innerWidth;
     // Adjust these values to fit your desired scale
-    if (screenWidth < 600) return '0.6rem'; // Small screens
-    if (screenWidth < 900) return '0.8rem'; // Medium screens
-    return '1rem'; // Larger screens
+    if (screenWidth < 600) return "0.6rem"; // Small screens
+    if (screenWidth < 900) return "0.8rem"; // Medium screens
+    return "1rem"; // Larger screens
   };
 
   return (
     <Card style={{
       maxWidth: "25rem",
       backgroundColor: props.color || "#2a323d",
-      color: "white"
+      color: "white",
+      height:"166px"
     }}>
       <div className="row">
         <div className="col-4">
@@ -76,60 +77,73 @@ const TransactionsResume = ({ transactionsResume }) => {
 
   const totalRecaudado = transactionsResume?.cashIncome?.totalAmount + transactionsResume?.cardIncome?.totalAmount || 0;
 
+  
   return (
     <>
-      {transactionsResume && Object.keys(transactionsResume).length > 0 ?
-        <>
+      {transactionsResume && Object.keys(transactionsResume).length > 0 ? (
+        <div className="container-fluid">
           <div className="row">
-            <div className="col-xl-3 mt-3 col-lg-4 col-md-6	" style={{ textAlign: "-webkit-center" }}>
-              <TransactionCardResume
-                icon={"fa-solid fa-square-check"}
-                value={transactionsResume.approvedTransactions.count}
-                message={"Transacciones aprobadas"}
-                color="green"
-              />
+            <div className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mt-3" style={{ textAlign: "center" }}>
+              <div style={{ height: "166px" }}>
+                <TransactionCardResume
+                  icon={"fa-solid fa-square-check"}
+                  value={transactionsResume.approvedTransactions.count}
+                  message={"Transacciones aprobadas"}
+                  color="green"
+                />
+              </div>
             </div>
-            <div className="col-xl-3 mt-3 col-lg-4 col-md-6" style={{ textAlign: "-webkit-center" }}>
-              <TransactionCardResume
-                icon={"fa-solid fa-ban"}
-                value={transactionsResume.canceledTransactions.count}
-                message={"Transacciones rechazadas"}
-                color="red"
-              />
+            <div className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mt-3" style={{ textAlign: "center" }}>
+              <div style={{ height: "166px" }}>
+                <TransactionCardResume
+                  icon={"fa-solid fa-ban"}
+                  value={transactionsResume.canceledTransactions.count}
+                  message={"Transacciones rechazadas"}
+                  color="red"
+                />
+              </div>
             </div>
-            <div className="col-xl-3 mt-3 col-lg-4 col-md-6" style={{ textAlign: "-webkit-center" }}>
-              <TransactionCardResume
-                icon={"fa-solid fa-money-bill"}
-                value={moneyFormater.format(transactionsResume.cashIncome.totalAmount)}
-                message={"Recaudo en Efectivo"}
-              />
+            <div className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mt-3" style={{ textAlign: "center" }}>
+              <div style={{ height: "166px" }}>
+                <TransactionCardResume
+                  icon={"fa-solid fa-money-bill"}
+                  value={moneyFormater.format(transactionsResume.cashIncome.totalAmount)}
+                  message={"Recaudo" + "en Efectivo"}
+                />
+              </div>
             </div>
-            <div className="col-xl-3 mt-3 col-lg-12 col-md-6" style={{ textAlign: "-webkit-center" }}>
-              <TransactionCardResume
-                icon={"fa-solid fa-credit-card"}
-                value={moneyFormater.format(transactionsResume.cardIncome.totalAmount)}
-                message={"Recaudo por Tarjeta"}
-              />
+            <div className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mt-3" style={{ textAlign: "center" }}>
+              <div style={{ height: "166px" }}>
+                <TransactionCardResume
+                  icon={"fa-solid fa-credit-card"}
+                  value={moneyFormater.format(transactionsResume.cardIncome.totalAmount)}
+                  message={"Recaudo por \nTarjeta"}
+                />
+              </div>
+            </div>
+            <div className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mt-3" style={{ textAlign: "center" }}>
+              <div style={{ height: "166px" }}>
+                <TransactionCardResume
+                  icon={"fa-solid fa-arrow-trend-down"}
+                  value={moneyFormater.format(transactionsResume.withdrawals.totalAmount)}
+                  message={"Retiros"}
+                />
+              </div>
+            </div>
+            <div className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mt-3" style={{ textAlign: "center"}}>
+              <div style={{ height: "166px" }}>
+                <TransactionCardResume
+                  icon={"fa-solid fa-dollar-sign"}
+                  value={moneyFormater.format(totalRecaudado)}
+                  message={"Total recaudado"}
+                />
+              </div>
             </div>
           </div>
-          <div className="row">
-            <div className="col-xl-3 mt-3 col-lg-6 col-md-6" style={{ textAlign: "-webkit-center" }}>
-              <TransactionCardResume
-                icon={"fa-solid fa-arrow-trend-down"}
-                value={moneyFormater.format(transactionsResume.withdrawals.totalAmount)}
-                message={"Retiros"}
-              />
-            </div>
-            <div className="col-xl-3 mt-3 col-lg-6 col-md-6" style={{ textAlign: "-webkit-center" }}>
-              <TransactionCardResume
-                icon={"fa-solid fa-dollar-sign"}
-                value={moneyFormater.format(totalRecaudado)}
-                message={"Total recaudado"}
-              />
-            </div>
-          </div>
-        </>
-        : ""}
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 };
