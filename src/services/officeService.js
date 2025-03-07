@@ -40,6 +40,20 @@ const getByClient = (idClient) => {
     });
 };
 
+// Get offices assigned to a specific user
+const getByUser= (idUser) => {
+  const token = window.localStorage.getItem("session");
+  const config = {
+    headers: { ...GENERAL_HEADERS, Authorization: "Bearer " + token },
+  };
+  return axios
+    .get("/api/User/Office/" + idUser, config)
+    .then((responseObj) => {
+      const { data } = responseObj;
+      return data;
+    });
+};
+
 const create = (office) => {
   
   const token = window.localStorage.getItem("session");
@@ -74,4 +88,4 @@ const deleteO = (id) => {
   });
 };
 
-export default { getAll, getById, getByClient, create, update, deleteO };
+export default { getAll, getById, getByClient, create, update, deleteO,getByUser };
