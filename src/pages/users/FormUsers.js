@@ -1975,6 +1975,12 @@ FormUsers.propTypes = {
 
 export default FormUsers;*/
 
+
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import userDto from "../../Dto/usersDto";
@@ -2134,11 +2140,11 @@ const FormUsers = ({
   }, []);
 
   // Function to determine if an office should be disabled (non-superadmin can only see assigned offices)
+ 
   const isOfficeDisabled = (officeId) => {
     if (isSuperAdmin) return false;
     return !assignedOffices.some(office => office.id === officeId);
   };
-
   const loadClientOffices = (clientId) => {
     if (!clientId) return;
 
@@ -2158,7 +2164,7 @@ const FormUsers = ({
         }
       });
   };
-
+  
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -2166,16 +2172,23 @@ const FormUsers = ({
       // Convert selected offices to a comma-separated string
       const selectedOfficesString = selectedOffices.join(",");
       console.log(selectedOfficesString);
+      // Si los datos están disponibles, hacemos el cálculo
+      const oficinasString = selectedOffices  // Sumar 1 a cada número y tomar el valor en la unidad
+        .join(",");
+
+      console.log(oficinasString);
+
+      userForm.offices=oficinasString;
+
       if (isEdit) {
-        editHandler(userForm, selectedOfficesString);
+        editHandler(userForm);
         console.log(selectedOffices);
       } else {
-        createHandler(userForm, selectedOfficesString);
+        createHandler(userForm);
         console.log(selectedOffices);
       }
     }
   };
-
   const handleChangePwd = async () => {
     const pwdChanged = await changePwdSweetA().then((result) => {
       if (result.isDenied || result.isDismissed) return false;
