@@ -608,7 +608,6 @@ export default App;
 
 library.add(fas, far);
 */
-
 import React, { useState, useEffect, useRef } from "react";
 import "./index.css";
 import LoginForm from "./pages/login/LoginForm";
@@ -624,7 +623,6 @@ import roleService from "./services/roleService";
 import { setPermitsLogged, setRoleLogged, setRoutesLogged, setUserLogged } from "./app/loginSlice";
 import { PrimeReactProvider } from "primereact/api";
 import { addLocale } from "primereact/api";
-import axios from "axios";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -648,25 +646,55 @@ const App = () => {
       showCancelButton: true,
       confirmButtonText: "Extender sesión",
       cancelButtonText: "Cerrar sesión",
+      didOpen: () => {
+        // Aquí puedes capturar el clic en el botón de "Cerrar sesión"
+        const closeSessionButton = document.querySelector(".swal2-cancel"); // El botón "Cerrar sesión"
+  
+        // Agregar el evento click al botón de "Cerrar sesión"
+        closeSessionButton.addEventListener("click", async () => {
+          try {
+            console.log("CERRAR SESION"); // Aquí puedes manejar la lógica de cerrar sesión
+            logOut(); // Llamamos a la función de logout sin pasar el evento
+            
+            // Limpiamos el estado de la sesión
+            dispatch(setUserLogged(null));
+            dispatch(setRoleLogged(null));
+            dispatch(setRoutesLogged([]));
+            dispatch(setPermitsLogged([]));
+            setToken(null); // Actualizamos el estado del token
+            window.localStorage.removeItem("session"); // Eliminamos el token del almacenamiento local
+  
+            Swal.fire({
+              title: "Sesión cerrada",
+              text: "Has cerrado sesión exitosamente",
+              icon: "success",
+              confirmButtonText: "Aceptar",
+            });
+          } catch (error) {
+            console.error("Error durante el logout:", error);
+          }
+        });
+      },
     });
-
+  
     if (result.isConfirmed) {
       // El usuario quiere extender la sesión, reiniciamos el temporizador
       resetTimer();
     } else {
-      // El usuario no quiere extender la sesión, cerramos sesión
+      // Si el resultado es cancelar o cerramos la sesión
+      logOut(); // Llamamos a logOut directamente sin pasar el evento
+      dispatch(setUserLogged(null));
+      dispatch(setRoleLogged(null));
+      dispatch(setRoutesLogged([]));
+      dispatch(setPermitsLogged([]));
+      setToken(null); // Actualizamos el estado del token
+      window.localStorage.removeItem("session"); // Eliminamos el token del almacenamiento local
+  
       try {
-        await logOut(); // Llamar al servicio logOut
+        console.log("Cancelar o cerrar sesión"); // Llamar al servicio logOut
       } catch (error) {
         console.error("Error durante el logout por inactividad:", error);
       } finally {
-        dispatch(setUserLogged(null));
-        dispatch(setRoleLogged(null));
-        dispatch(setRoutesLogged([]));
-        dispatch(setPermitsLogged([]));
-        setToken(null); // Actualizamos el estado del token
-        window.localStorage.removeItem("session"); // Eliminamos el token del almacenamiento local
-
         Swal.fire({
           title: "Sesión expirada",
           text: "Su sesión ha expirado por inactividad",
@@ -676,8 +704,24 @@ const App = () => {
       }
     }
   };
-
+  
+  const logOut = () => {
+    userService
+      .logOut()
+      .then(() => {
+        window.localStorage.removeItem("session");
+        window.location.href = "/"; // Redirigir al inicio o página de login
+      })
+      .catch(({ response }) => {
+        // Si hay un error, lo logueamos
+        if (process.env.NODE_ENV === "development") {
+          console.log(response);
+        }
+      });
+  };
+  
   // Servicio de logout
+  /*
   const logOut = () => {
     const token = window.localStorage.getItem("session");
     const config = {
@@ -688,7 +732,7 @@ const App = () => {
       return responseObj.data;
     });
   };
-
+*/
   // Resetea el temporizador al detectar interacción del usuario
   const events = [
     "mousedown", "mousemove", "keypress", "scroll", "touchstart", "click"
