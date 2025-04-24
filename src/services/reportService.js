@@ -5,18 +5,16 @@ const GENERAL_HEADERS = {
   DashboardKeyId: process.env.REACT_APP_DKEYID,
 };
 
-/*
 const getAll = () => {
   const token = window.localStorage.getItem('session');
   const config = {
     headers: { ...GENERAL_HEADERS, Authorization: 'Bearer ' + token },
   };
-  return axios.get('/api/Transaction', config).then((responseObj) => {
+  return axios.get('/api/Payer', config).then((responseObj) => {
     const { data } = responseObj;
     return data;
   });
 };
-*/
 
 const getByIdPaypadAndDate = (dateRangeDto) => {
   const token = window.localStorage.getItem("session");
@@ -31,7 +29,7 @@ const getByIdPaypadAndDate = (dateRangeDto) => {
     });
 };
 
-/*const getDetailsByIdTransaction = (idTransaction) => {
+const getDetailsByIdTransaction = (idTransaction) => {
   const token = window.localStorage.getItem("session");
   const config = {
     headers: { ...GENERAL_HEADERS, Authorization: "Bearer " + token },
@@ -42,9 +40,9 @@ const getByIdPaypadAndDate = (dateRangeDto) => {
       const { data } = responseObj;
       return data;
     });
-};*/
+};
 
-/*const getExcelReport = (excelTransactionDto) => {
+const getExcelReport = (excelTransactionDto) => {
   const token = window.localStorage.getItem("session");
   const config = {
     headers: { ...GENERAL_HEADERS, Authorization: "Bearer " + token},
@@ -90,6 +88,5 @@ const downloadVideo = (transactionInfoDto) => {
       window.URL.revokeObjectURL(href);
     });
 };
-*/
 
-export default { getByIdPaypadAndDate};
+export default { getByIdPaypadAndDate,getAll,getDetailsByIdTransaction,getExcelReport,downloadVideo };
