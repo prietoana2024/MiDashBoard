@@ -5,13 +5,12 @@ import SelectPayPad from "../shared/SelectPayPad";
 import useFormDate from "../shared/hooks/useFormDate";
 import FormDate from "../shared/FormDate";
 import useSelectPayPad from "../shared/hooks/useSelectPayPad";
-import useTransaction from "../shared/hooks/useTransaction";
-import { TransactionsTable } from "../transactions/components/TransactionTable";
 import SelectProduct from "../shared/SelectProduct";
 import useSelectProduct from "../shared/hooks/useSelectProduct";
 import {TitlePage} from "../../../components/TitlePage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { ReportsTable } from "./components/ReportsTable";
+import useTransaction from "../shared/hooks/useTransaction";
 
 const Reports = () => {
   const {paypads, selectedPaypad, handleChangePaypad} = useSelectPayPad(true);
@@ -88,7 +87,7 @@ const Reports = () => {
         </div>
       </div>
       <div className="container-fluid pt-2 bg-dark rounded-4  overflow-auto">
-        <TransactionsTable transactionsTable = {transactionsTable} dateRange = {dateRange}  showDetailed = {false}></TransactionsTable>
+        <ReportsTable reportsTable = {transactionsTable} dateRange = {dateRange}  showDetailed = {false}></ReportsTable>
       </div>
     </div>
   );
