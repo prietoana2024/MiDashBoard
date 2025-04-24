@@ -27,24 +27,49 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
     if (!newReports) return;
     let table = [];
     newReports.forEach((item) => {
+      // Format date safely with null check
+      let formattedDate = "N/A";  // Default value
+      if (item.dateCreated) {
+        try {
+          formattedDate = 
+            item.dateCreated.split("T")[0] +
+            " " +
+            item.dateCreated.split("T")[1].substring(0, 8);
+        } catch (error) {
+          console.log("Error formatting date:", error);
+          formattedDate = String(item.dateCreated);
+        }
+      } else if (item.datE_CREATED) {  // Check for alternate capitalization
+        try {
+          formattedDate = 
+            item.datE_CREATED.split("T")[0] +
+            " " +
+            item.datE_CREATED.split("T")[1].substring(0, 8);
+        } catch (error) {
+          console.log("Error formatting date:", error);
+          formattedDate = String(item.datE_CREATED);
+        }
+      }
+      
       const tableItem = {
-        id: item.id,
-        ID: item.id,
-        Trámite: item.typeTransaction,
-        "Referencia cliente": item.reference,
-        Documento: item.document,
-        Fecha:
-          item.dateCreated.split("T")[0] +
-          " " +
-          item.dateCreated.split("T")[1].substring(0, 8),
-        Total: moneyFormater.format(item.totalAmount),
-        "Total sin redondear": moneyFormater.format(item.realAmount),
-        Ingresado: moneyFormater.format(item.incomeAmount),
-        Devuelto: moneyFormater.format(item.returnAmount),
-        "Medio de pago": item.typePayment,
-        Estado: <StateLabel value={item.stateReport} />,
+        id: item.id || item.ID || 0,
+        ID: item.id || item.ID || 0,
+        Referencia: item.reference || "N/A",
+        Fecha: formattedDate,
+        Total: moneyFormater.format(item.totalAmount || item.totaL_AMOUNT || 0),
+        "Tipo de Documento": item.documenT_TYPE || item.documenttype || "N/A",
+        Documento: item.document || "N/A",
+        Nombres: item.name || "N/A",
+        Apellidos: item.lastname || "N/A",
+        Celular: item.phone || "N/A",
+        Email: item.email || "N/A",
+        Trámite: item.product || item.typeTransaction || "N/A",
+        "Medio de pago": item.iD_TYPE_PAYMENT ? `Tipo ${item.iD_TYPE_PAYMENT}` : "N/A",
+        Estado: <StateLabel value={item.stateReport || item.iD_STATE_TRANSACTION} />,
       };
-      if(element !== null) {
+      
+      // Always add the action button - the ReportsTable component will decide whether to show it
+      if(typeof element !== "undefined" && element !== null) {
         tableItem["Accion"] = (
           <IconBtn
             clickFunc={() => {
@@ -64,37 +89,56 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
     });
     setReportsTable([...table]);
   };
-
   const getReportsOnePaypad = (internalSelectedPaypad, concatReports = false) => {
-    reportService.getByIdPaypadAndDate({
-      id: internalSelectedPaypad.id,
-      from: dateRange.from,
-      to: dateRange.to,
-    }).then(({ response }) => {
-      if(concatReports) setReports((state) => {
-        setInitialReports(state.concat([...response]));
-        return state.concat([...response]);});
-      else setReports([...response]);
-    }).catch(async ({ response }) => {
-      let [errCode, errMsg] = await handleHttpError(response);
-      if (errCode === errorCodes.notFound) {
-        if(concatReports) return;
-        errMsg = "No se encontró ninguna transacción";
+    reportService
+      .getByIdPaypadAndDate({
+        id: internalSelectedPaypad.id,
+        from: dateRange.from,
+        to: dateRange.to,
+      })
+      .then((data) => {
+        console.log("Raw response data:", data);
+  
+        // Extraer datos del reporte
+        let reportData=data;
+        console.log("Processed report data:", reportData);
+  
+        if (reportData.length > 0) {
+          if (concatReports) {
+            setReports((state) => {
+              const newReports = [...state, ...reportData];
+              setInitialReports(newReports);
+              return newReports;
+            });
+          } else {
+            setReports(reportData);
+          }
+        } else {
+          console.warn("No reports found in response");
+          if (!concatReports) setReports([]);
+        }
+      })
+      .catch(async (error) => {
+        console.error("Error in getReportsOnePaypad:", error);
+        const errorResponse = error && error.response ? error.response : error;
+        let [errCode, errMsg] = await handleHttpError(errorResponse);
+        if (errCode === errorCodes.notFound) {
+          if (concatReports) return;
+          errMsg = "No se encontró ninguna transacción";
+          Swal.fire({
+            text: errMsg,
+            icon: "warning",
+          });
+          setReports([]);
+          return;
+        }
         Swal.fire({
           text: errMsg,
-          icon: "warning",
+          icon: "error",
         });
         setReports([]);
-        return;
-      }
-      Swal.fire({
-        text: errMsg,
-        icon: "error",
       });
-      setReports([]);
-    });
   };
-
   const refresh = async () => {
     if (dateRange === null || selectedPaypad === null) return;
     if(selectedPaypad.id == "all"){

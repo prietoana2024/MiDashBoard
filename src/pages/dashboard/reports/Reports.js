@@ -10,12 +10,12 @@ import useSelectProduct from "../shared/hooks/useSelectProduct";
 import {TitlePage} from "../../../components/TitlePage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ReportsTable } from "./components/ReportsTable";
-import useTransaction from "../shared/hooks/useTransaction";
+import useReport from "../shared/hooks/useReport";
 
 const Reports = () => {
   const {paypads, selectedPaypad, handleChangePaypad} = useSelectPayPad(true);
   const {dateRange, handleSubmitDate, dateTimeFrom, dateTimeTo, setDateTimeFrom, setDateTimeTo} = useFormDate();
-  const { transactionsTable, refresh, initialTransactions, setTransactions} = useTransaction(dateRange, selectedPaypad);
+  const { reportsTable, refresh, initialReports, setReports} = useReport(dateRange, selectedPaypad);
   const [products, setProducts] = useState([]);
   const [selectedProduct, handleProductChange] = useSelectProduct(products);
 
@@ -30,17 +30,17 @@ const Reports = () => {
   }, [dateRange]);
 
   useEffect(()=>{
-    let products = initialTransactions.map(tr => tr.product);
+    let products = initialReports.map(tr => tr.product);
     if(products.length > 0)products.push("Todos");
     setProducts([... new Set(products)]);
-  }, [initialTransactions]);
+  }, [initialReports]);
 
   useEffect(()=>{
     if(selectedProduct == "Todos"){
-      setTransactions([...initialTransactions]);
+      setReports([...initialReports]);
       return;
     }
-    setTransactions([...initialTransactions.filter(tr => tr.product == selectedProduct)]);
+    setReports([...initialReports.filter(tr => tr.product == selectedProduct)]);
   }, [selectedProduct]);
 
   return (
@@ -87,7 +87,7 @@ const Reports = () => {
         </div>
       </div>
       <div className="container-fluid pt-2 bg-dark rounded-4  overflow-auto">
-        <ReportsTable reportsTable = {transactionsTable} dateRange = {dateRange}  showDetailed = {false}></ReportsTable>
+        <ReportsTable reportsTable = {reportsTable} dateRange = {dateRange}  showDetailed = {false}></ReportsTable>
       </div>
     </div>
   );
