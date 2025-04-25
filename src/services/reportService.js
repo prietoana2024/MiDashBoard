@@ -16,43 +16,52 @@ const getAll = () => {
   });
 };*/
 
+
 const getByIdPaypadAndDate = (dateRangeDto) => {
   const token = window.localStorage.getItem("session");
   const config = {
     headers: { ...GENERAL_HEADERS, Authorization: "Bearer " + token },
   };
+  
+  // Helper function
+  function getProperty(item, propNames, defaultValue = null) {
+    for (const prop of propNames) {
+      if (item[prop] !== undefined && item[prop] !== null) {
+        return item[prop];
+      }
+    }
+    return defaultValue;
+  }
+  
   return axios
     .post("/api/Payer/GetByPaypadDate", dateRangeDto, config)
     .then((responseObj) => {
       console.log(responseObj);
       const { data } = responseObj;
       
-      // Map the response data to your reportDto format
       if (data && data.response && Array.isArray(data.response)) {
-        // Transform each item in the response array to match your reportDto structure
         const mappedData = data.response.map(item => {
           return {
-            id: item.id || 0,
-            document: item.document || null,
-            documenttype: item.documenT_TYPE || null,
-            name: item.name || null,
-            lastName: item.lastname || null,
-            nacionality: null, // Not present in API response
-            birthday: null, // Not present in API response
-            phone: item.phone || null,
-            email: item.email || null,
-            adress: null, // Not present in API response
-            departament: null, // Not present in API response
-            municipality: null, // Not present in API response
-            state: item.iD_STATE_TRANSACTION || 0,
-            idtransaction: item.iD_TRANSACTION || 0,
-            idClient: 0, // Not present in API response
-            client: null, // Not present in API response
-            idUserCreated: item.idUserCreated || 0,
-            userCreated: item.userCreated || null,
-            idUserUpdated: item.idUserUpdated || 0,
-            userUpdated: item.userUpdated || null,
-            dateCreated: item.datE_CREATED || null
+            id: getProperty(item, ["id", "ID"], 0),
+            referencia: getProperty(item, ["reference", "REFERENCE"]),
+            document: getProperty(item, ["document", "DOCUMENT"]),
+            documenttype: getProperty(item, ["documenttype", "documenT_TYPE", "DOCUMENT_TYPE"]),
+            name: getProperty(item, ["name", "NAME"]),
+            lastName: getProperty(item, ["lastName", "lastname", "LASTNAME"]),
+            nacionality: getProperty(item, ["nacionality", "NACIONALITY"]),
+            birthday: getProperty(item, ["birthday", "BIRTHDAY"]),
+            phone: getProperty(item, ["phone", "PHONE"]),
+            email: getProperty(item, ["email", "EMAIL"]),
+            municipality: getProperty(item, ["municipality", "MUNICIPALITY"]),
+            state: getProperty(item, ["state", "STATE", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"], 0),
+            idtransaction: getProperty(item, ["idtransaction", "iD_TRANSACTION", "ID_TRANSACTION"], 0),
+            idClient: getProperty(item, ["idClient", "idclient", "ID_CLIENT"], 0),
+            client: getProperty(item, ["client", "CLIENT"]),
+            idUserCreated: getProperty(item, ["idUserCreated", "iD_USER_CREATED", "ID_USER_CREATE"], 0),
+            userCreated: getProperty(item, ["userCreated", "USER_CREATED"]),
+            idUserUpdated: getProperty(item, ["idUserUpdated", "iD_USER_UPDATED", "ID_USER_UPDATED"], 0),
+            userUpdated: getProperty(item, ["userUpdated", "USER_UPDATED"]),
+            dateCreated: getProperty(item, ["dateCreated", "datE_CREATED", "DATE_CREATED"])
           };
         });
         

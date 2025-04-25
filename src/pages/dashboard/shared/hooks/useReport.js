@@ -9,11 +9,11 @@ import { Modal } from "bootstrap";
 import paypadService from "../../../../services/paypadService";
 
 
-const useReport= (dateRange = null, selectedPaypad = null) => {
+const useReport = (dateRange = null, selectedPaypad = null) => {
   const [reports, setReports] = useState([]);
   const [reportsTable, setReportsTable] = useState([]);
   const [modalElement, setModalElement] = useState(null);
-  
+
   const [initialReports, setInitialReports] = useState([]);
   const element = useMemo(() => document.getElementById("reportsModal"));
 
@@ -22,58 +22,136 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
     currency: "USD",
     maximumFractionDigits: 0,
   });
-
+  /*
+    const buildTable = (newReports) => {
+      if (!newReports) return;
+      let table = [];
+      newReports.forEach((item) => {
+        // Format date safely with null check
+        let formattedDate = "N/A";  // Default value
+        if (item.dateCreated) {
+          try {
+            formattedDate = 
+              item.dateCreated.split("T")[0] +
+              " " +
+              item.dateCreated.split("T")[1].substring(0, 8);
+          } catch (error) {
+            console.log("Error formatting date:", error);
+            formattedDate = String(item.dateCreated);
+          }
+        } else if (item.datE_CREATED) {  // Check for alternate capitalization
+          try {
+            formattedDate = 
+              item.datE_CREATED.split("T")[0] +
+              " " +
+              item.datE_CREATED.split("T")[1].substring(0, 8);
+          } catch (error) {
+            console.log("Error formatting date:", error);
+            formattedDate = String(item.datE_CREATED);
+          }
+        }
+        
+        const tableItem = {
+          id: item.id || item.ID || 0,
+          ID: item.id || item.ID || 0,
+          Referencia: item.reference || "N/A",
+          Fecha: formattedDate,
+          Total: moneyFormater.format(item.totalAmount || item.totaL_AMOUNT || 0),
+          "Tipo de Documento": item.documenT_TYPE || item.documenttype || "N/A",
+          Documento: item.document || "N/A",
+          Nombres: item.name || "N/A",
+          Apellidos: item.lastname || "N/A",
+          Celular: item.phone || "N/A",
+          Email: item.email || "N/A",
+          Trámite: item.product || item.typeTransaction || "N/A",
+          "Medio de pago": item.iD_TYPE_PAYMENT ? `Tipo ${item.iD_TYPE_PAYMENT}` : "N/A",
+          Estado: <StateLabel value={item.stateReport || item.iD_STATE_TRANSACTION} />,
+        };
+        
+        // Always add the action button - the ReportsTable component will decide whether to show it
+        if(typeof element !== "undefined" && element !== null) {
+          tableItem["Accion"] = (
+            <IconBtn
+              clickFunc={() => {
+                const itemCopy = {...item};
+                setModalElement(
+                  <TransactionDetailView
+                    report={itemCopy}
+                  />
+                );
+              }}
+              icon="fa-solid fa-glasses"
+              tooltipText="Ver más"
+            />
+          );
+        }
+        table = table.concat(tableItem);
+      });
+      setReportsTable([...table]);
+    };
+    function getProperty(item, propNames, defaultValue = "N/A") {
+      for (const prop of propNames) {
+        if (item[prop] !== undefined && item[prop] !== null) {
+          return item[prop];
+        }
+      }
+      return defaultValue;
+    }*/
   const buildTable = (newReports) => {
     if (!newReports) return;
     let table = [];
+
+    // Función helper para obtener propiedades con múltiples posibles nombres
+    function getProperty(item, propNames, defaultValue = "N/A") {
+      for (const prop of propNames) {
+        if (item[prop] !== undefined && item[prop] !== null) {
+          return item[prop];
+        }
+      }
+      return defaultValue;
+    }
+
     newReports.forEach((item) => {
       // Format date safely with null check
       let formattedDate = "N/A";  // Default value
-      if (item.dateCreated) {
+      const dateCreated = getProperty(item, ["dateCreated", "datE_CREATED", "DATE_CREATED"]);
+
+      if (dateCreated && dateCreated !== "N/A") {
         try {
-          formattedDate = 
-            item.dateCreated.split("T")[0] +
+          formattedDate =
+            dateCreated.split("T")[0] +
             " " +
-            item.dateCreated.split("T")[1].substring(0, 8);
+            dateCreated.split("T")[1].substring(0, 8);
         } catch (error) {
           console.log("Error formatting date:", error);
-          formattedDate = String(item.dateCreated);
-        }
-      } else if (item.datE_CREATED) {  // Check for alternate capitalization
-        try {
-          formattedDate = 
-            item.datE_CREATED.split("T")[0] +
-            " " +
-            item.datE_CREATED.split("T")[1].substring(0, 8);
-        } catch (error) {
-          console.log("Error formatting date:", error);
-          formattedDate = String(item.datE_CREATED);
+          formattedDate = String(dateCreated);
         }
       }
-      
+
       const tableItem = {
-        id: item.id || item.ID || 0,
-        ID: item.id || item.ID || 0,
-        Referencia: item.reference || "N/A",
+        id: getProperty(item, ["id", "ID"], 0),
+        ID: getProperty(item, ["id", "ID"], 0),
+        Referencia: getProperty(item, ["reference", "REFERENCE", "Reference"]),
         Fecha: formattedDate,
-        Total: moneyFormater.format(item.totalAmount || item.totaL_AMOUNT || 0),
-        "Tipo de Documento": item.documenT_TYPE || item.documenttype || "N/A",
-        Documento: item.document || "N/A",
-        Nombres: item.name || "N/A",
-        Apellidos: item.lastname || "N/A",
-        Celular: item.phone || "N/A",
-        Email: item.email || "N/A",
-        Trámite: item.product || item.typeTransaction || "N/A",
-        "Medio de pago": item.iD_TYPE_PAYMENT ? `Tipo ${item.iD_TYPE_PAYMENT}` : "N/A",
-        Estado: <StateLabel value={item.stateReport || item.iD_STATE_TRANSACTION} />,
+        Total: moneyFormater.format(getProperty(item, ["totalAmount", "totaL_AMOUNT", "TOTAL_AMOUNT"], 0)),
+        "Tipo de Documento": getProperty(item, ["documenttype", "documenT_TYPE", "DOCUMENT_TYPE"]),
+        Documento: getProperty(item, ["document", "DOCUMENT", "Document"]),
+        Nombres: getProperty(item, ["name", "NAME", "Name"]),
+        Apellidos: getProperty(item, ["lastName", "lastname", "LASTNAME", "LastName"]),
+        Celular: getProperty(item, ["phone", "PHONE", "Phone"]),
+        Email: getProperty(item, ["email", "EMAIL", "Email"]),
+        Trámite: getProperty(item, ["product", "PRODUCT", "typeTransaction", "TYPE_TRANSACTION"]),
+        "Medio de pago": getProperty(item, ["ID_TYPE_PAYMENT", "iD_TYPE_PAYMENT"]) !== "N/A" ?
+          `Tipo ${getProperty(item, ["ID_TYPE_PAYMENT", "iD_TYPE_PAYMENT"])}` : "N/A",
+        Estado: <StateLabel value={getProperty(item, ["stateReport", "STATE", "state", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"])} />,
       };
-      
+
       // Always add the action button - the ReportsTable component will decide whether to show it
-      if(typeof element !== "undefined" && element !== null) {
+      if (typeof element !== "undefined" && element !== null) {
         tableItem["Accion"] = (
           <IconBtn
             clickFunc={() => {
-              const itemCopy = {...item};
+              const itemCopy = { ...item };
               setModalElement(
                 <TransactionDetailView
                   report={itemCopy}
@@ -89,6 +167,9 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
     });
     setReportsTable([...table]);
   };
+  // Luego usarlo así:
+  //Nombres: getProperty(item, ["name", "NAME", "Name"])
+
   const getReportsOnePaypad = (internalSelectedPaypad, concatReports = false) => {
     reportService
       .getByIdPaypadAndDate({
@@ -98,11 +179,11 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
       })
       .then((data) => {
         console.log("Raw response data:", data);
-  
+
         // Extraer datos del reporte
-        let reportData=data;
+        let reportData = data;
         console.log("Processed report data:", reportData);
-  
+
         if (reportData.length > 0) {
           if (concatReports) {
             setReports((state) => {
@@ -141,7 +222,7 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
   };
   const refresh = async () => {
     if (dateRange === null || selectedPaypad === null) return;
-    if(selectedPaypad.id == "all"){
+    if (selectedPaypad.id == "all") {
       let paypads = await paypadService.getAll()
         .then(({ response }) => {
           return [...response];
@@ -176,7 +257,7 @@ const useReport= (dateRange = null, selectedPaypad = null) => {
     buildTable(reports);
   }, [reports]);
 
-  return {reports, reportsTable, modalElement, setReports, refresh, initialReports};
+  return { reports, reportsTable, modalElement, setReports, refresh, initialReports };
 };
 
 export default useReport;
