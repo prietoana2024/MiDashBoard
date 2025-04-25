@@ -61,7 +61,10 @@ const getByIdPaypadAndDate = (dateRangeDto) => {
             userCreated: getProperty(item, ["userCreated", "USER_CREATED"]),
             idUserUpdated: getProperty(item, ["idUserUpdated", "iD_USER_UPDATED", "ID_USER_UPDATED"], 0),
             userUpdated: getProperty(item, ["userUpdated", "USER_UPDATED"]),
-            dateCreated: getProperty(item, ["dateCreated", "datE_CREATED", "DATE_CREATED"])
+            dateCreated: getProperty(item, ["dateCreated", "datE_CREATED", "DATE_CREATED"]),
+            product:getProperty(item, ["product", "PRODUCT"]),
+            paymenttype:getProperty(item, ["iD_TYPE_PAYMENT", "ID_TYPE_PAYMENT","paymenttype"]),
+            total:getProperty(item, ["totaL_AMOUNT", "TOTAL_AMOUNT","total"]),
           };
         });
         

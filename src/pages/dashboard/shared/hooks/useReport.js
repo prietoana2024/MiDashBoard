@@ -127,25 +127,46 @@ const useReport = (dateRange = null, selectedPaypad = null) => {
           formattedDate = String(dateCreated);
         }
       }
-
+      /*
+            const tableItem = {
+              id: getProperty(item, ["id", "ID"], 0),
+              ID: getProperty(item, ["id", "ID"], 0),
+              Referencia: getProperty(item, ["referencia", "REFERENCIA", "Referencia"]),
+              Fecha: formattedDate,
+              Total: moneyFormater.format(getProperty(item, ["totalAmount", "totaL_AMOUNT", "TOTAL_AMOUNT", "total"], 0)),
+              "Tipo de Documento": getProperty(item, ["documenttype", "documenT_TYPE", "DOCUMENT_TYPE"]),
+              Documento: getProperty(item, ["document", "DOCUMENT", "Document"]),
+              Nombres: getProperty(item, ["name", "NAME", "Name"]),
+              Apellidos: getProperty(item, ["lastName", "lastname", "LASTNAME", "LastName"]),
+              Celular: getProperty(item, ["phone", "PHONE", "Phone"]),
+              Email: getProperty(item, ["email", "EMAIL", "Email"]),
+              Trámite: getProperty(item, ["product", "PRODUCT"]),
+              Tipo: getProperty(item, ["paymentType", "iD_TYPE_PAYMENT", "paymenttype"]),
+              Estado: <StateLabel value={getProperty(item, ["stateReport", "STATE", "state", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"])} />,
+            };*/
       const tableItem = {
         id: getProperty(item, ["id", "ID"], 0),
         ID: getProperty(item, ["id", "ID"], 0),
-        Referencia: getProperty(item, ["reference", "REFERENCE", "Reference"]),
+        Referencia: getProperty(item, ["referencia", "REFERENCIA", "Referencia"]),
         Fecha: formattedDate,
-        Total: moneyFormater.format(getProperty(item, ["totalAmount", "totaL_AMOUNT", "TOTAL_AMOUNT"], 0)),
+        Total: moneyFormater.format(getProperty(item, ["totalAmount", "totaL_AMOUNT", "TOTAL_AMOUNT", "total"], 0)),
         "Tipo de Documento": getProperty(item, ["documenttype", "documenT_TYPE", "DOCUMENT_TYPE"]),
         Documento: getProperty(item, ["document", "DOCUMENT", "Document"]),
         Nombres: getProperty(item, ["name", "NAME", "Name"]),
         Apellidos: getProperty(item, ["lastName", "lastname", "LASTNAME", "LastName"]),
         Celular: getProperty(item, ["phone", "PHONE", "Phone"]),
         Email: getProperty(item, ["email", "EMAIL", "Email"]),
-        Trámite: getProperty(item, ["product", "PRODUCT", "typeTransaction", "TYPE_TRANSACTION"]),
-        "Medio de pago": getProperty(item, ["ID_TYPE_PAYMENT", "iD_TYPE_PAYMENT"]) !== "N/A" ?
-          `Tipo ${getProperty(item, ["ID_TYPE_PAYMENT", "iD_TYPE_PAYMENT"])}` : "N/A",
-        Estado: <StateLabel value={getProperty(item, ["stateReport", "STATE", "state", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"])} />,
-      };
+        Trámite: getProperty(item, ["product", "PRODUCT"]),
+        Tipo: (() => {
+          const paymentType = getProperty(item, ["paymentType", "iD_TYPE_PAYMENT", "paymenttype"]);
+          return paymentType === 1 ? "Efectivo" : paymentType === 2 ? "Tarjeta" : "Desconocido";
+        })(),
 
+        Estado: <StateLabel value={(() => {
+          const state = getProperty(item, ["stateReport", "STATE", "state", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"]);
+          return state === 1 ? "Iniciada" : state === 2 ? "Aprobada" : state === 3 ? "Cancelada": state === 4 ? "Aprobada Error Devuelta": state === 5 ? "Cancelada Error Devuelta" :state===6 ? "Aprobada Sin Notificar" : state===7 ? "Error Servicio de Tercero" :"Desconocido";
+        })()} />,
+      };
       // Always add the action button - the ReportsTable component will decide whether to show it
       if (typeof element !== "undefined" && element !== null) {
         tableItem["Accion"] = (
@@ -189,6 +210,7 @@ const useReport = (dateRange = null, selectedPaypad = null) => {
             setReports((state) => {
               const newReports = [...state, ...reportData];
               setInitialReports(newReports);
+
               return newReports;
             });
           } else {

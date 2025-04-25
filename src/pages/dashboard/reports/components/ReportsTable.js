@@ -13,7 +13,6 @@ const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
       <div className="">
         {reportsTable.length > 0 ? (
           <>
-            {/* <TableCrud data={transactionsTable.slice((page - 1) * 10, page * 10)} isEnumarated={false} /> */}
             <DataTable selectionMode="single" value={reportsTable} paginator rows={5}
               tableStyle={{minHeight: "30rem"}} rowsPerPageOptions={[5, 10, 25, 50]}>
               <Column body={BasicStringBuilder("ID")} header="ID" ></Column>
@@ -27,7 +26,7 @@ const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
               <Column body={BasicStringBuilder("Celular")} header="Celular" ></Column>
               <Column body={BasicStringBuilder("Email")} header="Email" ></Column>
               <Column body={BasicStringBuilder("Trámite")} header="Trámite" ></Column>
-              <Column body={BasicStringBuilder("Medio de pago")} header="Medio de pago" ></Column>
+              <Column body={BasicStringBuilder("Tipo")} header="Tipo" ></Column>
               <Column header="Estado" body={BasicContainerBuilder("Estado")}></Column>
               {showDetailed?<Column header="Accion" body={BasicContainerBuilder("Accion")}></Column>: ""}
             </DataTable>
@@ -43,3 +42,4 @@ const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
 };
 
 export {ReportsTable};
+

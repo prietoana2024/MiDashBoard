@@ -10,7 +10,6 @@ const reportDto = {
       phone: null,
       email:null,
       iD_TRANSACTION: 0,
-      product:null,
       iD_TYPE_PAYMENT: 0,
       id: 0,
       idUserCreated: 0,
@@ -18,7 +17,8 @@ const reportDto = {
       dateCreated: null,
       idUserUpdated: 0,
       userUpdated: null,
-      dateUpdated: null
+      dateUpdated: null,
+      product:null
   };
   
   export default reportDto;

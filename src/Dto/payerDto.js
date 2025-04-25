@@ -19,7 +19,9 @@ const payerDto = {
     userCreated: null,
     idUserUpdated: 0,
     userUpdated: null,
-    dateCreated: null
+    dateCreated: null,
+    product:null,
+    iD_TYPE_PAYMENT: 0,
   };
   
   export default payerDto;
