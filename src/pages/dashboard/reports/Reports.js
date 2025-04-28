@@ -92,7 +92,9 @@ const Reports = () => {
   );
 };
 
-export default withAuthorization(["/Reports"], Reports);*/import "../../pages.css";
+export default withAuthorization(["/Reports"], Reports);*/
+
+import "../../pages.css";
 import {React, useEffect, useState} from "react";
 import withAuthorization from "../../withAuthorization";
 import SelectPayPad from "../shared/SelectPayPad";
@@ -229,3 +231,4 @@ const Reports = () => {
 };
 
 export default withAuthorization(["/Reports"], Reports);
+
