@@ -1,21 +1,8 @@
 import axios from "axios";
 
 const GENERAL_HEADERS = {
-  // eslint-disable-next-line no-undef
   DashboardKeyId: process.env.REACT_APP_DKEYID,
 };
-/*
-const getAll = () => {
-  const token = window.localStorage.getItem('session');
-  const config = {
-    headers: { ...GENERAL_HEADERS, Authorization: 'Bearer ' + token },
-  };
-  return axios.get('/api/Payer', config).then((responseObj) => {
-    const { data } = responseObj;
-    return data;
-  });
-};*/
-
 
 const getByIdPaypadAndDate = (dateRangeDto) => {
   const token = window.localStorage.getItem("session");
@@ -131,20 +118,6 @@ const getByIdPaypadAndDateProduct = (dateRangeDto) => {
       return data;
     });
 };
-/*
-const getByIdPaypadAndDate = (dateRangeDto) => {
-  const token = window.localStorage.getItem("session");
-  const config = {
-    headers: { ...GENERAL_HEADERS, Authorization: "Bearer " + token },
-  };
-  return axios
-    .post("/api/Payer/GetByPaypadDate", dateRangeDto, config)
-    .then((responseObj) => {
-      console.log(responseObj);
-      const { data } = responseObj;
-      return data;
-    });
-};*/
 
 const getDetailsByIdTransaction = (idTransaction) => {
   const token = window.localStorage.getItem("session");
