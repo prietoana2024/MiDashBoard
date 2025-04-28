@@ -139,7 +139,7 @@ const getExcelReport = (excelTransactionDto) => {
     responseType: "blob"
   };
   return axios
-    .post("/api/Transaction/ExcelDoc", excelTransactionDto, config).then(response => {
+    .post("/api/Payer/ExcelDoc", excelTransactionDto, config).then(response => {
       const href = window.URL.createObjectURL(response.data);
 
       const anchorElement = document.createElement("a");

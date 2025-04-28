@@ -137,7 +137,6 @@ const Reports = () => {
 export default withAuthorization(["/Reports"], Reports);*/
 
 import "../../pages.css";
-import { React, useEffect, useState } from "react";
 import withAuthorization from "../../withAuthorization";
 import SelectPayPad from "../shared/SelectPayPad";
 import useFormDate from "../shared/hooks/useFormDate";
@@ -148,6 +147,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ReportsTable } from "./components/ReportsTable";
 import useReport from "../shared/hooks/useReport";
 import PropTypes from "prop-types";
+import reportService from "../../../services/reportService";
+import { handleHttpError } from "../../../errorHandling/errorHandler";
+import Swal from "sweetalert2";
+import { Toolbar } from "primereact/toolbar";
+import React, { useEffect, useState } from "react";
+
+
+const formatDate = (fecha) => {
+  let month = "" + (fecha.getMonth() + 1),
+    day = "" + fecha.getDate(),
+    year = fecha.getFullYear();
+
+  if (month.length < 2)
+    month = "0" + month;
+  if (day.length < 2)
+    day = "0" + day;
+
+  return [year, month, day].join("-");
+};
 
 // Hardcoded list of procedures
 const PROCEDURES = ["Predial", "Renovacion", "Certificado de compra venta", "Todos"];
@@ -214,6 +232,36 @@ const Reports = () => {
     }
   }, [dateRange, selectedProcedure]);
 
+  const requestExcel = () => {
+    if (dateRange.from == undefined || dateRange.to == undefined) return;
+
+    // Usar las transacciones filtradas para el Excel
+    let body = {
+      transactionIds: reportsTable.map(t => t.id),
+      paypadId: selectedPaypad.id,
+      fileName: `Reporte_${selectedPaypad.username}_${formatDate(dateRange.from)}_a_${formatDate(dateRange.to)}.xlsx`.replace(" ", "")
+    };
+
+    reportService.getExcelReport(body).catch(async ({ response }) => {
+      let [, errMsg] = await handleHttpError(response);
+      errMsg = "Ocurrio un error generando el archivo.";
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+      return;
+    });
+  };
+
+  const startContent = (
+    <React.Fragment>
+      <button className="btn btn-outline-success"
+        onClick={requestExcel}>
+        <FontAwesomeIcon icon={"fa-solid fa-file-excel"} className="ms-2" style={{ marginRight: "1rem" }} />
+        Excel
+      </button>
+    </React.Fragment>
+  );
   return (
     <div className="p-4 w-100 h-100">
       <TitlePage title={"reportes"} icon={"fa-solid fa-money-check-dollar"}></TitlePage>
@@ -261,6 +309,7 @@ const Reports = () => {
         </div>
       </div>
       <div className="container-fluid pt-2 bg-dark rounded-4 overflow-auto">
+        {reportsTable.length <= 0 ? "" : <Toolbar start={startContent}></Toolbar>}
         <ReportsTable reportsTable={reportsTable} dateRange={dateRange} showDetailed={false}></ReportsTable>
       </div>
     </div>
