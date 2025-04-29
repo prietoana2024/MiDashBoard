@@ -1,3 +1,5 @@
+import { string } from "prop-types";
+
 const userDto = {
   id: 0,
   pwd: null,
@@ -21,6 +23,7 @@ const userDto = {
   userCreated: null,
   idUserUpdated: 0,
   userUpdated: null,
+  offices: string,
 };
 
 export default userDto;

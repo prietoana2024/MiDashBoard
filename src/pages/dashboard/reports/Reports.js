@@ -1,48 +1,88 @@
-import "../../pages.css";
+/*import "../../pages.css";
 import {React, useEffect, useState} from "react";
 import withAuthorization from "../../withAuthorization";
 import SelectPayPad from "../shared/SelectPayPad";
 import useFormDate from "../shared/hooks/useFormDate";
 import FormDate from "../shared/FormDate";
 import useSelectPayPad from "../shared/hooks/useSelectPayPad";
-import useTransaction from "../shared/hooks/useTransaction";
-import { TransactionsTable } from "../transactions/components/TransactionTable";
-import SelectProduct from "../shared/SelectProduct";
-import useSelectProduct from "../shared/hooks/useSelectProduct";
 import {TitlePage} from "../../../components/TitlePage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReportsTable } from "./components/ReportsTable";
+import useReport from "../shared/hooks/useReport";
+import PropTypes from "prop-types";
 
+// Componente de selección de trámite
+const SelectProcedure = ({ procedures, handleProcedureChange, selectedProcedure }) => {
+  return (
+    <div className="form-group">
+      <label htmlFor="procedure" className="form-label">Trámite</label>
+      <select
+        className="form-select"
+        id="procedure"
+        value={selectedProcedure || ""}
+        onChange={(e) => handleProcedureChange(e.target.value)}
+      >
+        <option value="">Seleccione un trámite</option>
+        {procedures.map((procedure, index) => (
+          <option key={index} value={procedure}>
+            {procedure}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+// PropTypes para el componente SelectProcedure
+SelectProcedure.propTypes = {
+  procedures: PropTypes.array.isRequired,
+  handleProcedureChange: PropTypes.func.isRequired,
+  selectedProcedure: PropTypes.string
+};
+
+// Hook para select de trámite
+const useSelectProcedure = () => {
+  const [selectedProcedure, setSelectedProcedure] = useState("Todos");
+
+  const handleProcedureChange = (procedure) => {
+    setSelectedProcedure(procedure);
+  };
+
+  return [selectedProcedure, handleProcedureChange];
+};
 
 const Reports = () => {
   const {paypads, selectedPaypad, handleChangePaypad} = useSelectPayPad(true);
   const {dateRange, handleSubmitDate, dateTimeFrom, dateTimeTo, setDateTimeFrom, setDateTimeTo} = useFormDate();
-  const { transactionsTable, refresh, initialTransactions, setTransactions} = useTransaction(dateRange, selectedPaypad);
-  const [products, setProducts] = useState([]);
-  const [selectedProduct, handleProductChange] = useSelectProduct(products);
+  const { reportsTable, refresh, initialReports, setReports} = useReport(dateRange, selectedPaypad);
+  
+  // Estados para trámites
+  const [procedures, setProcedures] = useState([]);
+  const [selectedProcedure, handleProcedureChange] = useSelectProcedure();
 
   useEffect(() => {
     refresh();
   }, []);
-
-
+  
   useEffect(() => {
     if (dateRange === null) return;
     refresh();
   }, [dateRange]);
 
-  useEffect(()=>{
-    let products = initialTransactions.map(tr => tr.product);
-    if(products.length > 0)products.push("Todos");
-    setProducts([... new Set(products)]);
-  }, [initialTransactions]);
+  useEffect(() => {
+    // Extraer todos los trámites únicos de los reportes
+    let extractedProcedures = initialReports.map(tr => tr.procedure);
+    if (extractedProcedures.length > 0) extractedProcedures.push("Todos");
+    setProcedures([... new Set(extractedProcedures)]);
+  }, [initialReports]);
 
-  useEffect(()=>{
-    if(selectedProduct == "Todos"){
-      setTransactions([...initialTransactions]);
+  useEffect(() => {
+    if (selectedProcedure === "Todos") {
+      setReports([...initialReports]);
       return;
     }
-    setTransactions([...initialTransactions.filter(tr => tr.product == selectedProduct)]);
-  }, [selectedProduct]);
+    setReports([...initialReports.filter(tr => tr.procedure === selectedProcedure)]);
+  }, [selectedProcedure, initialReports]);
 
   return (
     <div className="p-4 w-100 h-100">
@@ -60,7 +100,6 @@ const Reports = () => {
             />
           </div>
           <div className="col-6" style={{borderLeft: "solid", alignSelf: "center"}}>
-            {/* <FormDate handleSubmitDate={handleSubmitDate} /> */}
             <FormDate handleSubmitDate={handleSubmitDate}
               dateFrom={dateTimeFrom}
               dateTo={dateTimeTo}
@@ -75,20 +114,203 @@ const Reports = () => {
               <FontAwesomeIcon icon={"fa-solid fa-search"} className="ms-2" style={{marginRight: "1rem"}}/>
               Consultar
             </button>
-          </div> 
+          </div>
         </div>
         <b>Reportar por:</b>
         <div className="row">
           <div className="col-6">
-            <SelectProduct
-              products={products}
-              handleProductChange={handleProductChange}
-              selectedProduct={selectedProduct}></SelectProduct>
+            <SelectProcedure
+              procedures={procedures}
+              handleProcedureChange={handleProcedureChange}
+              selectedProcedure={selectedProcedure}
+            />
           </div>
         </div>
       </div>
-      <div className="container-fluid pt-2 bg-dark rounded-4  overflow-auto">
-        <TransactionsTable transactionsTable = {transactionsTable} dateRange = {dateRange}  showDetailed = {false}></TransactionsTable>
+      <div className="container-fluid pt-2 bg-dark rounded-4 overflow-auto">
+        <ReportsTable reportsTable={reportsTable} dateRange={dateRange} showDetailed={false}></ReportsTable>
+      </div>
+    </div>
+  );
+};
+
+export default withAuthorization(["/Reports"], Reports);*/
+
+import "../../pages.css";
+import withAuthorization from "../../withAuthorization";
+import SelectPayPad from "../shared/SelectPayPad";
+import useFormDate from "../shared/hooks/useFormDate";
+import FormDate from "../shared/FormDate";
+import useSelectPayPad from "../shared/hooks/useSelectPayPad";
+import { TitlePage } from "../../../components/TitlePage";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReportsTable } from "./components/ReportsTable";
+import useReport from "../shared/hooks/useReport";
+import PropTypes from "prop-types";
+import reportService from "../../../services/reportService";
+import { handleHttpError } from "../../../errorHandling/errorHandler";
+import Swal from "sweetalert2";
+import { Toolbar } from "primereact/toolbar";
+import React, { useEffect, useState } from "react";
+
+
+const formatDate = (fecha) => {
+  let month = "" + (fecha.getMonth() + 1),
+    day = "" + fecha.getDate(),
+    year = fecha.getFullYear();
+
+  if (month.length < 2)
+    month = "0" + month;
+  if (day.length < 2)
+    day = "0" + day;
+
+  return [year, month, day].join("-");
+};
+
+// Hardcoded list of procedures
+const PROCEDURES = ["Predial", "Renovacion", "Certificado de compra venta", "Todos"];
+
+// Componente de selección de trámite
+const SelectProcedure = ({ procedures, handleProcedureChange, selectedProcedure }) => {
+  return (
+    <div className="form-group">
+      <label htmlFor="procedure" className="form-label">Trámite</label>
+      <select
+        className="form-select"
+        id="procedure"
+        value={selectedProcedure || ""}
+        onChange={(e) => handleProcedureChange(e.target.value)}
+      >
+        <option value="">Seleccione un trámite</option>
+        {procedures.map((procedure, index) => (
+          <option key={index} value={procedure}>
+            {procedure}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+// PropTypes para el componente SelectProcedure
+SelectProcedure.propTypes = {
+  procedures: PropTypes.array.isRequired,
+  handleProcedureChange: PropTypes.func.isRequired,
+  selectedProcedure: PropTypes.string,
+};
+
+// Hook para select de trámite
+const useSelectProcedure = () => {
+  const [selectedProcedure, setSelectedProcedure] = useState("Todos");
+
+  const handleProcedureChange = (procedure) => {
+    setSelectedProcedure(procedure);
+  };
+
+  return [selectedProcedure, handleProcedureChange];
+};
+
+const Reports = () => {
+  const { paypads, selectedPaypad, handleChangePaypad } = useSelectPayPad(true);
+  const { dateRange, handleSubmitDate, dateTimeFrom, dateTimeTo, setDateTimeFrom, setDateTimeTo } = useFormDate();
+  const { reportsTable, refresh, refreshProduct } = useReport(dateRange, selectedPaypad);
+
+  // Estados para trámites
+  const [procedures] = useState(PROCEDURES); // Use hardcoded procedures
+  const [selectedProcedure, handleProcedureChange] = useSelectProcedure();
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  useEffect(() => {
+    if (dateRange === null) return;
+    if (selectedProcedure === "Todos" || !selectedProcedure) {
+      refresh(); // Fetch all reports when "Todos" or no procedure is selected
+    } else {
+      refreshProduct(selectedProcedure); // Fetch reports for specific procedure
+    }
+  }, [dateRange, selectedProcedure]);
+
+  const requestExcel = () => {
+    if (dateRange.from == undefined || dateRange.to == undefined) return;
+
+    // Usar las transacciones filtradas para el Excel
+    let body = {
+      transactionIds: reportsTable.map(t => t.id),
+      paypadId: selectedPaypad.id,
+      fileName: `Reporte_${selectedPaypad.username}_${formatDate(dateRange.from)}_a_${formatDate(dateRange.to)}.xlsx`.replace(" ", "")
+    };
+
+    reportService.getExcelReport(body).catch(async ({ response }) => {
+      let [, errMsg] = await handleHttpError(response);
+      errMsg = "Ocurrio un error generando el archivo.";
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+      return;
+    });
+  };
+
+  const startContent = (
+    <React.Fragment>
+      <button className="btn btn-outline-success"
+        onClick={requestExcel}>
+        <FontAwesomeIcon icon={"fa-solid fa-file-excel"} className="ms-2" style={{ marginRight: "1rem" }} />
+        Excel
+      </button>
+    </React.Fragment>
+  );
+  return (
+    <div className="p-4 w-100 h-100">
+      <TitlePage title={"reportes"} icon={"fa-solid fa-money-check-dollar"}></TitlePage>
+      <div
+        className="container-fluid mb-6 justify-content-start bg-dark rounded-4"
+        style={{ marginBottom: "3rem", paddingLeft: "5rem", paddingRight: "5rem", paddingTop: "2rem", paddingBottom: "2rem" }}
+      >
+        <b>Parametros de busqueda</b>
+        <div className="row">
+          <div className="col-6">
+            <SelectPayPad
+              paypads={paypads ? paypads : []}
+              paypadSelected={selectedPaypad}
+              handleChangePaypad={handleChangePaypad}
+              showAllPayPads={true}
+            />
+          </div>
+          <div className="col-6" style={{ borderLeft: "solid", alignSelf: "center" }}>
+            <FormDate
+              handleSubmitDate={handleSubmitDate}
+              dateFrom={dateTimeFrom}
+              dateTo={dateTimeTo}
+              setDateFrom={setDateTimeFrom}
+              setDateTo={setDateTimeTo}
+            />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-12 p-2" style={{ textAlign: "end" }}>
+            <button className="btn btn-outline-success" onClick={handleSubmitDate}>
+              <FontAwesomeIcon icon={"fa-solid fa-search"} className="ms-2" style={{ marginRight: "1rem" }} />
+              Consultar
+            </button>
+          </div>
+        </div>
+        <b>Reportar por:</b>
+        <div className="row">
+          <div className="col-6">
+            <SelectProcedure
+              procedures={procedures}
+              handleProcedureChange={handleProcedureChange}
+              selectedProcedure={selectedProcedure}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="container-fluid pt-2 bg-dark rounded-4 overflow-auto">
+        {reportsTable.length <= 0 ? "" : <Toolbar start={startContent}></Toolbar>}
+        <ReportsTable reportsTable={reportsTable} dateRange={dateRange} showDetailed={false}></ReportsTable>
       </div>
     </div>
   );
