@@ -27,7 +27,7 @@ const useSelectPayPad = (addAll = false, user = null) => {
         }
         
         if (addAll) {
-          response.push({ id: "all", username: "Todos los Pay+" });
+          //response.push({ id: "all", username: "Todos los Pay+" });
         }
         
         setPaypads([...response]);
