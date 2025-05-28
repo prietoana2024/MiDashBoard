@@ -277,7 +277,6 @@ export default useReport;*/
 
 import { React, useState, useEffect, useMemo } from "react";
 import IconBtn from "../../../../components/UI/Edit_DeleteBtn/IconBtn";
-import StateLabel from "../StateLabel";
 import TransactionDetailView from "../../transactions/components/TransactionDetail";
 import reportService from "../../../../services/reportService";
 import { errorCodes, handleHttpError } from "../../../../errorHandling/errorHandler";
@@ -343,28 +342,24 @@ const useReport = (dateRange = null, selectedPaypad = null) => {
           const paymentType = getProperty(item, ["paymentType", "iD_TYPE_PAYMENT", "paymenttype"]);
           return paymentType === 1 ? "Efectivo" : paymentType === 2 ? "Tarjeta" : "Desconocido";
         })(),
-        Estado: (
-          <StateLabel
-            value={() => {
-              const state = getProperty(item, ["stateReport", "STATE", "state", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"]);
-              return state === 1
-                ? "Iniciada"
-                : state === 2
-                  ? "Aprobada"
-                  : state === 3
-                    ? "Cancelada"
-                    : state === 4
-                      ? "Aprobada Error Devuelta"
-                      : state === 5
-                        ? "Cancelada Error Devuelta"
-                        : state === 6
-                          ? "Aprobada Sin Notificar"
-                          : state === 7
-                            ? "Error Servicio de Tercero"
-                            : "Desconocido";
-            }}
-          />
-        ),
+        Estado: (() => {
+          const state = getProperty(item, ["stateReport", "STATE", "state", "iD_STATE_TRANSACTION", "ID_STATE_TRANSACTION"]);
+          return state === 1
+            ? "Iniciada"
+            : state === 2
+              ? "Aprobada"
+              : state === 3
+                ? "Cancelada"
+                : state === 4
+                  ? "Aprobada Error Devuelta"
+                  : state === 5
+                    ? "Cancelada Error Devuelta"
+                    : state === 6
+                      ? "Aprobada Sin Notificar"
+                      : state === 7
+                        ? "Error Servicio de Tercero"
+                        : "Desconocido";
+        })(),
       };
       if (typeof element !== "undefined" && element !== null) {
         tableItem["Accion"] = (

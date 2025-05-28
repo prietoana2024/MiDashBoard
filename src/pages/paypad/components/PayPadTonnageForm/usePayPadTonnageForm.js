@@ -27,7 +27,7 @@ const usePayPadTonnageForm = () => {
           Denominación: (
             <div className="d-flex justify-content-center">
               <img
-                src={`/staticfiles${item.imgDenom}`}
+                src={`${item.imgDenom}`}
                 alt={`${moneyFormater.format(item.denominationValue)}`}
                 height="40px"
               />
@@ -58,7 +58,7 @@ const usePayPadTonnageForm = () => {
           Denominación: (
             <div className="d-flex justify-content-center">
               <img
-                src={`/staticfiles${item.imgDenom}`}
+                src={`${item.imgDenom}`}
                 alt={`${moneyFormater.format(item.denominationValue)}`}
                 height="40px"
               />

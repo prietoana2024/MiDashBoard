@@ -61,7 +61,7 @@ const CurrencyDenominations = () => {
         Moneda: item.currency,
         Denominación: (
           <img
-            src={`/staticfiles${item.img}`}
+            src={`${item.img}`}
             alt={`${moneyFormater.format(item.value)}`}
             height="75px"
           />

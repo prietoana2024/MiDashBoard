@@ -6,7 +6,28 @@ import { Column } from "primereact/column";
 import BasicStringBuilder from "../../../../components/BasicPrimeTemplates/BasicStringBuilder";
 import BasicContainerBuilder from "../../../../components/BasicPrimeTemplates/BasicContainerBuilder";
 
-const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
+const ReportsTable = ({ reportsTable, dateRange, showDetailed = true }) => {
+
+  // Template personalizado para el Estado que mantiene el styling
+  const estadoBodyTemplate = (rowData) => {
+    // Si ya viene como componente React, lo renderiza directamente
+    if (React.isValidElement(rowData.Estado)) {
+      return rowData.Estado;
+    }
+    // Si viene como string, lo renderiza con el mismo estilo que StateLabel
+    return (
+      <span className="state-label" style={{
+        backgroundColor: "#28a745", // Verde como el StateLabel
+        color: "white",
+        padding: "4px 8px",
+        borderRadius: "4px",
+        fontSize: "15px",
+        fontWeight: "bold"
+      }}>
+        {rowData.Estado}
+      </span>
+    );
+  };
 
   const renderList = () => {
     return (
@@ -14,7 +35,7 @@ const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
         {reportsTable.length > 0 ? (
           <>
             <DataTable selectionMode="single" value={reportsTable} paginator rows={5}
-              tableStyle={{minHeight: "30rem"}} rowsPerPageOptions={[5, 10, 25, 50]}>
+              tableStyle={{ minHeight: "30rem" }} rowsPerPageOptions={[5, 10, 25, 50]}>
               <Column body={BasicStringBuilder("ID")} header="ID" ></Column>
               <Column body={BasicStringBuilder("Referencia")} header="Referencia" ></Column>
               <Column body={BasicStringBuilder("Fecha")} header="Fecha" ></Column>
@@ -27,12 +48,13 @@ const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
               <Column body={BasicStringBuilder("Email")} header="Email" ></Column>
               <Column body={BasicStringBuilder("Trámite")} header="Trámite" ></Column>
               <Column body={BasicStringBuilder("Tipo")} header="Tipo" ></Column>
-              <Column header="Estado" body={BasicContainerBuilder("Estado")}></Column>
-              {showDetailed?<Column header="Accion" body={BasicContainerBuilder("Accion")}></Column>: ""}
+              <Column header="Estado" body={estadoBodyTemplate}></Column>
+
+              {showDetailed ? <Column header="Accion" body={BasicContainerBuilder("Accion")}></Column> : ""}
             </DataTable>
           </>
         ) : (
-          dateRange? <SearchingInfo msg="Resultados no encontrados"></SearchingInfo>: <SearchingInfo msg="Seleccione los criterios de búsqueda"></SearchingInfo>
+          dateRange ? <SearchingInfo msg="Resultados no encontrados"></SearchingInfo> : <SearchingInfo msg="Seleccione los criterios de búsqueda"></SearchingInfo>
         )}
       </div>
     );
@@ -40,6 +62,7 @@ const ReportsTable = ({reportsTable, dateRange, showDetailed = true}) => {
 
   return renderList();
 };
+//            <Column header="Estado" body={BasicContainerBuilder("Estado")}></Column>
 
-export {ReportsTable};
+export { ReportsTable };
 
