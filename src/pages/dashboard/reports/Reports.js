@@ -167,8 +167,8 @@ const formatDate = (fecha) => {
   return [year, month, day].join("-");
 };
 
-// Hardcoded list of procedures
-const PROCEDURES = ["Predial", "Renovacion", "Certificado de compra venta", "Todos"];
+// Hardcoded list of procedures 
+const PROCEDURES = ["Certificado de Registro mercantil", "Registro mercantíl del establecimiento","Certificado de Existencia y Representación Legal","Certificado de cancelación","Certificado de libros","Certificado Registro Único de Proponentes","Apoderados judiciales","Certificado especial de compraventa","Certificado especial de liquidación de personas jurídicas", "Todos"];
 
 // Componente de selección de trámite
 const SelectProcedure = ({ procedures, handleProcedureChange, selectedProcedure }) => {
