@@ -68,8 +68,9 @@ const Navbar = ({ userLogged, toggleSidebar }) => {
           <img
             src={
               userLogged?.img !== undefined && userLogged?.img !== null
-                ? `/staticfiles${userLogged.img}`
-                : "/images/profile-default.png"
+                ?
+                `/staticfiles${userLogged.img}` // Ruta existente: /staticfiles
+                : "/images/profile-default.png" // Imagen por defecto
             }
             className="me-2"
             width="40px"
