@@ -1,6 +1,7 @@
-{
+ 
+ {
   "name": "dashboard-front",
-  "proxy": "https://localhost:7137",
+  "proxy": "https://apidashboardv3.e-city.co",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
