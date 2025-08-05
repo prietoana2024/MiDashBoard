@@ -1,7 +1,6 @@
- 
- {
+{
   "name": "dashboard-front",
-  "proxy": "https://apidashboardv3.e-city.co",
+  "proxy": "https://localhost:7137",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -57,6 +56,7 @@
     ]
   },
   "devDependencies": {
+    "dotenv-cli": "^10.0.0",
     "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.37.3",
     "react-scripts": "^5.0.1"
