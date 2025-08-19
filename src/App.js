@@ -27,6 +27,7 @@ const App = () => {
     timeoutId.current = setTimeout(handleTimeout, 2 * 60 * 1000); // 2 minutos de inactividad (para pruebas)
   };
 
+
   // Manejar el tiempo de inactividad
   const handleTimeout = async () => {
     const result = await Swal.fire({
@@ -36,16 +37,19 @@ const App = () => {
       showCancelButton: true,
       confirmButtonText: "Extender sesión",
       cancelButtonText: "Cerrar sesión",
+      allowOutsideClick: false, // Evita cerrar el modal haciendo clic fuera
+      allowEscapeKey: false,    // Opcional: evita cerrar con la tecla Escape
+      allowEnterKey: true,      // Permite confirmar con Enter
       didOpen: () => {
         // Aquí puedes capturar el clic en el botón de "Cerrar sesión"
         const closeSessionButton = document.querySelector(".swal2-cancel"); // El botón "Cerrar sesión"
-  
+
         // Agregar el evento click al botón de "Cerrar sesión"
         closeSessionButton.addEventListener("click", async () => {
           try {
             console.log("CERRAR SESION"); // Aquí puedes manejar la lógica de cerrar sesión
             logOut(); // Llamamos a la función de logout sin pasar el evento
-            
+
             // Limpiamos el estado de la sesión
             dispatch(setUserLogged(null));
             dispatch(setRoleLogged(null));
@@ -53,7 +57,7 @@ const App = () => {
             dispatch(setPermitsLogged([]));
             setToken(null); // Actualizamos el estado del token
             window.localStorage.removeItem("session"); // Eliminamos el token del almacenamiento local
-  
+
             Swal.fire({
               title: "Sesión cerrada",
               text: "Has cerrado sesión exitosamente",
@@ -66,7 +70,7 @@ const App = () => {
         });
       },
     });
-  
+
     if (result.isConfirmed) {
       // El usuario quiere extender la sesión, reiniciamos el temporizador
       resetTimer();
@@ -79,7 +83,7 @@ const App = () => {
       dispatch(setPermitsLogged([]));
       setToken(null); // Actualizamos el estado del token
       window.localStorage.removeItem("session"); // Eliminamos el token del almacenamiento local
-  
+
       try {
         console.log("Cancelar o cerrar sesión"); // Llamar al servicio logOut
       } catch (error) {
@@ -94,7 +98,7 @@ const App = () => {
       }
     }
   };
-  
+
   const logOut = () => {
     userService
       .logOut()
