@@ -257,7 +257,7 @@ const TransactionDetailView = ({transaction }) => {
         id: item.id,
         "Tipo de operacion": item.typeOperation,
         "Denominación": <img
-          src={`staticfiles${item.denominationImg}`}
+          src={`${process.env.REACT_APP_BASEADD}staticfiles${item.denominationImg}`}
           alt={`Denominación:${moneyFormater.format(item.denominationValue)}`}
           height="50px"
         />,

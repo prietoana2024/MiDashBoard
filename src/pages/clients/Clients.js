@@ -62,7 +62,7 @@ const Clients = () => {
         id: item.id,
         Logo: (
           <img
-            src={`/staticfiles${item.logoImg}`}
+            src={`${process.env.REACT_APP_BASEADD}/staticfiles${item.logoImg}`}
             alt={"Logo " + item.name}
             height="50px"
           />

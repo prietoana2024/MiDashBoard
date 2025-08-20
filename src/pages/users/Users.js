@@ -61,7 +61,7 @@ const Users = () => {
           <img
             src={
               item.img !== undefined && item.img !== null
-                ? `/staticfiles${item.img}`
+                ? `${process.env.REACT_APP_BASEADD}/staticfiles${item.img}`
                 : "/images/profile-default.png"
             }
             alt={`Imagen de perfil ${item.userName}`}
