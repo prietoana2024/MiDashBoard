@@ -107,7 +107,31 @@ const update = (user) => {
   });
 };
 
+const create = async (user) => {
+  const token = window.localStorage.getItem("session");
+  const config = {
+    headers: { ...GENERAL_HEADERS, Authorization: `Bearer ${token}` },
+  };
+  user.pwd = encryptPwd(user.pwd);
+  console.log("user",user);
+
+  console.log("seleccionadas",user);
   
+  try {
+
+    const responseObj = await axios.post("/api/User", user, config);
+    //const userId = responseObj.data.response.id;
+
+    //await assignOffices(userId, oficinasSeleccionadasString);
+    
+    return responseObj;
+
+  } catch (error) {
+    console.error("Error in user creation or office assignment:", error);
+    throw error;
+  }
+};
+  /*
 const create = async (user) => {
   const token = window.localStorage.getItem("session");
   const config = {
@@ -127,7 +151,7 @@ const create = async (user) => {
     console.error("Error in user creation or office assignment:", error);
     throw error;
   }
-};
+};*/
 
 const assignOffices = (userId, offices) => {
   console.log("userId", userId,"offices", offices);

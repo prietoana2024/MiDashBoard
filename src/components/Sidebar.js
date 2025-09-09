@@ -23,7 +23,6 @@ const Sidebar = ({ routesList, className }) => {
 
   return (
     <div className={"sidebar bg-dark " + className} style={{ fontSize: "0.85rem" }}>
-      {/* <h6 className="m-1 p-3 text-white-50">Navegación</h6> */}
       <ul>{renderRoutesList(itemsList)}</ul>
     </div>
   );
@@ -98,3 +97,4 @@ SubmenuItem.propTypes = {
 };
 
 export default Sidebar;
+

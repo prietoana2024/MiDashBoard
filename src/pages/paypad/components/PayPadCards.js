@@ -11,7 +11,7 @@ const PaypadCards = ({ data }) => {
       <div className="row">
         {data.map((paypad) => (
           <div key={paypad.id} className="col-xl-3 mt-3" style={{ textAlign: "-webkit-center" }}>
-            <Card className="card-pay-pad" style={{ maxHeigth: "20rem", height: "20rem" }}>
+            <Card className="card-pay-pad" /*style={{ maxHeigth: "20rem", height: "20rem" }}*/>
               <div className="p-2">
                 <div>
                   <h3 style={{ overflowWrap: "break-word", fontSize: "1.3rem" }}>

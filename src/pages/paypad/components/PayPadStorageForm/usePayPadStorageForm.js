@@ -59,7 +59,7 @@ const usePayPadStorageForm = () => {
         Denominación: (
           <div className="d-flex justify-content-center">
             <img
-              src={`/staticfiles${item.img}`}
+              src={`${item.img}`}
               alt={`${moneyFormater.format(item.value)}`}
               height="40px"
             />

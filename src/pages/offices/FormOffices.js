@@ -17,6 +17,7 @@ const FormOffices = ({ idToEdit, createHandler, editHandler, backHandler }) => {
 
   const [officesForm, setOfficesForm] = useState(officeDto);
   const [formFieldsAux, setFormFieldsAux] = useState([...formFieldsAuxInit]);
+  
   useEffect(() => {
     if (idToEdit !== null) {
       officeService
