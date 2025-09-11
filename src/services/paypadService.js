@@ -24,6 +24,7 @@ const encryptPwd = (pwd) => {
 };
 
 const getAll = () => {
+  
   const token = window.localStorage.getItem("session");
   const config = {
     headers: { ...GENERAL_HEADERS, Authorization: "Bearer " + token },

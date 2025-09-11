@@ -213,7 +213,7 @@ const Users = () => {
     };*/
 
   // Función para convertir base64 a blob
-  const base64ToBlob = (base64Data, contentType = "") => {
+  /*const base64ToBlob = (base64Data, contentType = "") => {
     const byteCharacters = atob(base64Data.split(",")[1]);
     const byteNumbers = new Array(byteCharacters.length);
 
@@ -224,9 +224,9 @@ const Users = () => {
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: contentType });
   };
-
+*/
   // Función para descargar y guardar imagen del usuario
-  const saveUserImageToLocal = async (userName, userId = null) => {
+  /*const saveUserImageToLocal = async (userName, userId = null) => {
     try {
       const storageKey = userId ? `userProfileImage_${userId}` : "userProfileImage_new";
       const extKey = `${storageKey}_ext`;
@@ -266,7 +266,7 @@ const Users = () => {
       console.error("Error al guardar la imagen:", error);
       return false;
     }
-  };
+  };*/
 
   // Función para limpiar imagen del localStorage
   const clearUserImageFromStorage = (userId = null) => {
@@ -278,7 +278,7 @@ const Users = () => {
   };
 
   // Función createUser actualizada
-  const createUser = async (userToCreate) => {
+  /*const createUser = async (userToCreate) => {
     try {
       const response = await userService.create(userToCreate);
       console.log(response);
@@ -316,10 +316,36 @@ const Users = () => {
         icon: "error",
       });
     }
+  };*/
+
+  const createUser = async (userToCreate) => {
+    try {
+      const response = await userService.create(userToCreate);
+      console.log(response);
+
+      // Si la creación fue exitosa
+      setForm(formInit);
+      refresh();
+
+      // Limpiar localStorage después de crear el usuario exitosamente
+      clearUserImageFromStorage();
+
+      Swal.fire({
+        text: "Usuario creado con éxito.",
+        icon: "success",
+      });
+
+    } catch ({ response }) {
+      const [, errMsg] = await handleHttpError(response);
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+    }
   };
 
   // Función updateUser actualizada (para actualizaciones desde el formulario)
-  const updateUser = async (userToUpdate) => {
+  /*const updateUser = async (userToUpdate) => {
     try {
       const response = await userService.update(userToUpdate);
       console.log(response);
@@ -358,6 +384,34 @@ const Users = () => {
           icon: "success",
         });
       }
+
+    } catch ({ response }) {
+      const [, errMsg] = await handleHttpError(response);
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+    }
+  };*/
+
+  const updateUser = async (userToUpdate) => {
+    try {
+      const response = await userService.update(userToUpdate);
+      console.log(response);
+
+      // Si la actualización fue exitosa
+      setForm(formInit);
+      refresh();
+
+      // Limpiar localStorage si viene del formulario (cuando se editó imagen)
+      if (form.idToUpdate) {
+        clearUserImageFromStorage(form.idToUpdate);
+      }
+
+      Swal.fire({
+        text: "Usuario actualizado con éxito",
+        icon: "success",
+      });
 
     } catch ({ response }) {
       const [, errMsg] = await handleHttpError(response);
