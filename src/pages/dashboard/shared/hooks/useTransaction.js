@@ -1,4 +1,4 @@
-import { React, useState, useEffect, useMemo } from "react";
+/*import { React, useState, useEffect, useMemo } from "react";
 import IconBtn from "../../../../components/UI/Edit_DeleteBtn/IconBtn";
 import StateLabel from "../StateLabel";
 import TransactionDetailView from "../../transactions/components/TransactionDetail";
@@ -133,6 +133,386 @@ const useTransaction = (dateRange = null, selectedPaypad = null) => {
   }, [transactions]);
 
   return {transactions, transactionsTable, modalElement, setTransactions, refresh, initialTransactions};
+};
+
+export default useTransaction;*/
+/*
+import { React, useState, useEffect, useMemo } from "react";
+import IconBtn from "../../../../components/UI/Edit_DeleteBtn/IconBtn";
+import StateLabel from "../StateLabel";
+import TransactionDetailView from "../../transactions/components/TransactionDetail";
+import transactionService from "../../../../services/transactionService";
+import { errorCodes, handleHttpError } from "../../../../errorHandling/errorHandler";
+import Swal from "sweetalert2";
+import { Modal } from "bootstrap";
+import paypadService from "../../../../services/paypadService";
+
+const useTransaction = (dateRange = null, selectedPaypads = null) => {
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsTable, setTransactionsTable] = useState([]);
+  const [modalElement, setModalElement] = useState(null);
+  const [initialTransactions, setInitialTransactions] = useState([]);
+  const element = useMemo(() => document.getElementById("transactionModal"));
+
+  const moneyFormater = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
+  const buildTable = (newTransactions) => {
+    if (!newTransactions) return;
+    let table = [];
+    newTransactions.forEach((item) => {
+      const tableItem = {
+        id: item.id,
+        ID: item.id,
+        Trámite: item.typeTransaction,
+        "Referencia cliente": item.reference,
+        Documento: item.document,
+        Fecha:
+          item.dateCreated.split("T")[0] +
+          " " +
+          item.dateCreated.split("T")[1].substring(0, 8),
+        Total: moneyFormater.format(item.totalAmount),
+        "Total sin redondear": moneyFormater.format(item.realAmount),
+        Ingresado: moneyFormater.format(item.incomeAmount),
+        Devuelto: moneyFormater.format(item.returnAmount),
+        "Medio de pago": item.typePayment,
+        Estado: <StateLabel value={item.stateTransaction} />,
+      };
+      if(element !== null) {
+        tableItem["Accion"] = (
+          <IconBtn
+            clickFunc={() => {
+              const itemCopy = {...item};
+              setModalElement(
+                <TransactionDetailView
+                  transaction={itemCopy}
+                />
+              );
+            }}
+            icon="fa-solid fa-glasses"
+            tooltipText="Ver más"
+          />
+        );
+      }
+      table = table.concat(tableItem);
+    });
+    setTransactionsTable([...table]);
+  };
+
+
+  const getTransactionsOnePaypad = (internalSelectedPaypad, concatTransactions = false) => {
+    transactionService.getByIdPaypadAndDate({
+      id: internalSelectedPaypad.id,
+      from: dateRange.from,
+      to: dateRange.to,
+    })
+    
+    .then((response) => {
+      // Los datos están en response.value
+      const data = response?.value || [];
+      if(concatTransactions) setTransactions((state) => {
+        setInitialTransactions(state.concat([...data]));
+        return state.concat([...data]);});
+      else setTransactions([...data]);
+    }).catch(async ({ response }) => {
+      let [errCode, errMsg] = await handleHttpError(response);
+      if (errCode === errorCodes.notFound) {
+        if(concatTransactions) return;
+        errMsg = "No se encontró ninguna transacción";
+        Swal.fire({
+          text: errMsg,
+          icon: "warning",
+        });
+        setTransactions([]);
+        return;
+      }
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+      setTransactions([]);
+    });
+  };
+
+  // Función para obtener transacciones de múltiples paypads
+  const getTransactionsMultiPaypad = (paypadIds) => {
+    transactionService.getByIdsPaypadsAndDate({
+      idsPaypads: paypadIds, // String "1,2,3"
+      from: dateRange.from,
+      to: dateRange.to,
+    }).then(({ response }) => {
+      setTransactions([...response]);
+      setInitialTransactions([...response]);
+    }).catch(async ({ response }) => {
+      let [errCode, errMsg] = await handleHttpError(response);
+      if (errCode === errorCodes.notFound) {
+        errMsg = "No se encontró ninguna transacción";
+        Swal.fire({
+          text: errMsg,
+          icon: "warning",
+        });
+        setTransactions([]);
+        return;
+      }
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+      setTransactions([]);
+    });
+  };
+
+  const refresh = async () => {
+    if (dateRange === null || selectedPaypads === null) return;
+    
+    // Si selectedPaypads es un array (nuevo comportamiento)
+    if (Array.isArray(selectedPaypads)) {
+      if (selectedPaypads.length === 0) return;
+      
+      // Obtener los IDs separados por comas
+      const paypadIds = selectedPaypads.map(p => p.id).join(",");
+      getTransactionsMultiPaypad(paypadIds);
+      return;
+    }
+    
+    // Compatibilidad con el comportamiento antiguo (objeto único)
+    if (selectedPaypads.id === "all") {
+      let paypads = await paypadService.getAll()
+        .then(({ response }) => {
+          return [...response];
+        })
+        .catch(async ({ response }) => {
+          const [errCode, errMsg] = await handleHttpError(response);
+          if (errCode !== errorCodes.notFound) {
+            Swal.fire({
+              text: errMsg,
+              icon: "error",
+            });
+            return;
+          }
+          return [];
+        });
+      paypads.forEach(pp => getTransactionsOnePaypad(pp, true));
+      return;
+    }
+    
+    getTransactionsOnePaypad(selectedPaypads);
+  };
+
+  useEffect(() => {
+    if (modalElement !== null && element !== null) {
+      const modal = new Modal(element, {
+        backdrop: "static",
+      });
+      modal.show();
+    }
+  }, [modalElement]);
+
+  useEffect(() => {
+    buildTable(transactions);
+  }, [transactions]);
+
+  return {
+    transactions, 
+    transactionsTable, 
+    modalElement, 
+    setTransactions, 
+    refresh, 
+    initialTransactions
+  };
+};
+
+export default useTransaction;*/
+import { React, useState, useEffect, useMemo } from "react";
+import IconBtn from "../../../../components/UI/Edit_DeleteBtn/IconBtn";
+import StateLabel from "../StateLabel";
+import TransactionDetailView from "../../transactions/components/TransactionDetail";
+import transactionService from "../../../../services/transactionService";
+import { errorCodes, handleHttpError } from "../../../../errorHandling/errorHandler";
+import Swal from "sweetalert2";
+import { Modal } from "bootstrap";
+import paypadService from "../../../../services/paypadService";
+
+const useTransaction = (dateRange = null, selectedPaypads = null) => {
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsTable, setTransactionsTable] = useState([]);
+  const [modalElement, setModalElement] = useState(null);
+  const [initialTransactions, setInitialTransactions] = useState([]);
+  const element = useMemo(() => document.getElementById("transactionModal"));
+
+  const moneyFormater = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
+  const buildTable = (newTransactions) => {
+    if (!newTransactions) return;
+    let table = [];
+    newTransactions.forEach((item) => {
+      const tableItem = {
+        id: item.id,
+        ID: item.id,
+        Trámite: item.typeTransaction,
+        "Referencia cliente": item.reference,
+        Documento: item.document,
+        Fecha:
+          item.dateCreated.split("T")[0] +
+          " " +
+          item.dateCreated.split("T")[1].substring(0, 8),
+        Total: moneyFormater.format(item.totalAmount),
+        "Total sin redondear": moneyFormater.format(item.realAmount),
+        Ingresado: moneyFormater.format(item.incomeAmount),
+        Devuelto: moneyFormater.format(item.returnAmount),
+        "Medio de pago": item.typePayment,
+        Estado: <StateLabel value={item.stateTransaction} />,
+      };
+      if(element !== null) {
+        tableItem["Accion"] = (
+          <IconBtn
+            clickFunc={() => {
+              const itemCopy = {...item};
+              setModalElement(
+                <TransactionDetailView
+                  transaction={itemCopy}
+                />
+              );
+            }}
+            icon="fa-solid fa-glasses"
+            tooltipText="Ver más"
+          />
+        );
+      }
+      table = table.concat(tableItem);
+    });
+    setTransactionsTable([...table]);
+  };
+
+  const getTransactionsOnePaypad = (internalSelectedPaypad, concatTransactions = false) => {
+    transactionService.getByIdPaypadAndDate({
+      id: internalSelectedPaypad.id,
+      from: dateRange.from,
+      to: dateRange.to,
+    }).then((responseObj) => {
+      // CORRECCIÓN: Los datos están en responseObj.response (no .value)
+      const data = responseObj?.response || [];
+      console.log("Transacciones un paypad:", data);
+      if(concatTransactions) setTransactions((state) => {
+        setInitialTransactions(state.concat([...data]));
+        return state.concat([...data]);});
+      else setTransactions([...data]);
+    }).catch(async ({ response }) => {
+      let [errCode, errMsg] = await handleHttpError(response);
+      if (errCode === errorCodes.notFound) {
+        if(concatTransactions) return;
+        errMsg = "No se encontró ninguna transacción";
+        Swal.fire({
+          text: errMsg,
+          icon: "warning",
+        });
+        setTransactions([]);
+        return;
+      }
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+      setTransactions([]);
+    });
+  };
+
+  // Función para obtener transacciones de múltiples paypads
+  const getTransactionsMultiPaypad = (paypadIds) => {
+    transactionService.getByIdsPaypadsAndDate({
+      idsPaypads: paypadIds, // String "1,2,3"
+      from: dateRange.from,
+      to: dateRange.to,
+    }).then((responseObj) => {
+      // Los datos están en responseObj.response
+      const data = responseObj?.response || [];
+      console.log("Transacciones múltiples paypads:", data);
+      setTransactions([...data]);
+      setInitialTransactions([...data]);
+    }).catch(async ({ response }) => {
+      let [errCode, errMsg] = await handleHttpError(response);
+      if (errCode === errorCodes.notFound) {
+        errMsg = "No se encontró ninguna transacción";
+        Swal.fire({
+          text: errMsg,
+          icon: "warning",
+        });
+        setTransactions([]);
+        return;
+      }
+      Swal.fire({
+        text: errMsg,
+        icon: "error",
+      });
+      setTransactions([]);
+    });
+  };
+
+  const refresh = async () => {
+    if (dateRange === null || selectedPaypads === null) return;
+    
+    // Si selectedPaypads es un array (nuevo comportamiento)
+    if (Array.isArray(selectedPaypads)) {
+      if (selectedPaypads.length === 0) return;
+      
+      // Obtener los IDs separados por comas
+      const paypadIds = selectedPaypads.map(p => p.id).join(",");
+      getTransactionsMultiPaypad(paypadIds);
+      return;
+    }
+    
+    // Compatibilidad con el comportamiento antiguo (objeto único)
+    if (selectedPaypads.id === "all") {
+      let paypads = await paypadService.getAll()
+        .then(({ response }) => {
+          return [...response];
+        })
+        .catch(async ({ response }) => {
+          const [errCode, errMsg] = await handleHttpError(response);
+          if (errCode !== errorCodes.notFound) {
+            Swal.fire({
+              text: errMsg,
+              icon: "error",
+            });
+            return;
+          }
+          return [];
+        });
+      paypads.forEach(pp => getTransactionsOnePaypad(pp, true));
+      return;
+    }
+    
+    getTransactionsOnePaypad(selectedPaypads);
+  };
+
+  useEffect(() => {
+    if (modalElement !== null && element !== null) {
+      const modal = new Modal(element, {
+        backdrop: "static",
+      });
+      modal.show();
+    }
+  }, [modalElement]);
+
+  useEffect(() => {
+    buildTable(transactions);
+  }, [transactions]);
+
+  return {
+    transactions, 
+    transactionsTable, 
+    modalElement, 
+    setTransactions, 
+    refresh, 
+    initialTransactions
+  };
 };
 
 export default useTransaction;

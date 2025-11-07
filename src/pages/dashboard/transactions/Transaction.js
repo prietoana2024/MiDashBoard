@@ -675,17 +675,17 @@ const createDataToTransactionResume = (transactions) => {
   };
 
   // Filtrar solo transacciones válidas
-  const validTransactions = transactions.filter(t => 
-    t && 
-    typeof t === "object" && 
+  const validTransactions = transactions.filter(t =>
+    t &&
+    typeof t === "object" &&
     t.stateTransaction
   );
 
-  const approvedTransactions = validTransactions.filter(t => 
+  const approvedTransactions = validTransactions.filter(t =>
     t.stateTransaction && t.stateTransaction.includes("Aprobada")
   );
-  
-  const canceledTransactions = validTransactions.filter(t => 
+
+  const canceledTransactions = validTransactions.filter(t =>
     t.stateTransaction === "Cancelada"
   );
 
@@ -704,10 +704,16 @@ const createDataToTransactionResume = (transactions) => {
         .filter(t => t.typePayment === "Efectivo")
         .reduce((sum, t) => sum + toValidNumber(t.totalAmount), 0)
     },
+    /* cardIncome: {
+       count: approvedTransactions.filter(t => t.typePayment === "Tarjeta de crédito").length,
+       totalAmountTarjeta: approvedTransactions
+         .filter(t => t.typePayment === "Tarjeta de crédito")
+         .reduce((sum, t) => sum + toValidNumber(t.totalAmount), 0)
+     },*/
     cardIncome: {
-      count: approvedTransactions.filter(t => t.typePayment === "Tarjeta de crédito").length,
+      count: approvedTransactions.filter(t => t.typePayment === "Tarjeta").length,
       totalAmountTarjeta: approvedTransactions
-        .filter(t => t.typePayment === "Tarjeta de crédito")
+        .filter(t => t.typePayment === "Tarjeta")
         .reduce((sum, t) => sum + toValidNumber(t.totalAmount), 0)
     },
     withdrawals: {
@@ -721,14 +727,14 @@ const Transactions = () => {
   const { dateRange, handleSubmitDate, dateTimeFrom, dateTimeTo, setDateTimeFrom, setDateTimeTo } = useFormDate();
   const { paypads, selectedPaypad, handleChangePaypad } = useSelectPayPad();
   const { transactionsTable, refresh, modalElement, transactions } = useTransaction(dateRange, selectedPaypad);
-  
+
   // Estado para el filtro de medio de pago
   const [selectedPaymentType, setSelectedPaymentType] = useState(null);
-  
+
   // Estados para detectar cambios en los parámetros de búsqueda
   const [previousPaypad, setPreviousPaypad] = useState(null);
   const [previousDateRange, setPreviousDateRange] = useState(null);
-  
+
   // Función para formatear el label del tipo de pago
   const formatPaymentTypeLabel = (type) => {
     if (type === "Tarjeta de crédito") return "Tarjeta";
@@ -738,16 +744,16 @@ const Transactions = () => {
   // Opciones de medios de pago basadas en los datos actuales
   const paymentTypeOptions = useMemo(() => {
     if (!transactions || transactions.length === 0) return [{ label: "Todos", value: null }];
-    
+
     // Extraer medios de pago únicos
     const uniquePaymentTypes = [...new Set(transactions.map(t => t.typePayment))];
-    
+
     // Formatear para el dropdown
     return [
       { label: "Todos", value: null },
-      ...uniquePaymentTypes.filter(Boolean).map(type => ({ 
-        label: formatPaymentTypeLabel(type), 
-        value: type 
+      ...uniquePaymentTypes.filter(Boolean).map(type => ({
+        label: formatPaymentTypeLabel(type),
+        value: type
       }))
     ];
   }, [transactions]);
@@ -762,9 +768,9 @@ const Transactions = () => {
 
   // Efecto para detectar cambios en dateRange y limpiar filtro
   useEffect(() => {
-    if (previousDateRange !== null && 
-        (dateRange?.from?.getTime() !== previousDateRange?.from?.getTime() ||
-         dateRange?.to?.getTime() !== previousDateRange?.to?.getTime())) {
+    if (previousDateRange !== null &&
+      (dateRange?.from?.getTime() !== previousDateRange?.from?.getTime() ||
+        dateRange?.to?.getTime() !== previousDateRange?.to?.getTime())) {
       setSelectedPaymentType(null);
     }
     setPreviousDateRange(dateRange);
@@ -790,10 +796,25 @@ const Transactions = () => {
   }, [transactions, selectedPaymentType]);
 
   // Transacciones en tabla filtradas por medio de pago
-  const filteredTransactionsTable = useMemo(() => {
+  /*const filteredTransactionsTable = useMemo(() => {
     if (!selectedPaymentType) return transactionsTable || [];
     return (transactionsTable || []).filter(t => t["Medio de pago"] === selectedPaymentType);
+  }, [transactionsTable, selectedPaymentType]);*/
+
+  const filteredTransactionsTable = useMemo(() => {
+    if (!selectedPaymentType) return transactionsTable || [];
+    // Comparar directamente con el campo "Medio de pago" de la tabla
+    return (transactionsTable || []).filter(t => {
+      const paymentMethod = t["Medio de pago"];
+      // Si el filtro es "Tarjeta", también incluir "Tarjeta de crédito" si existe
+      if (selectedPaymentType === "Tarjeta") {
+        return paymentMethod === "Tarjeta" || paymentMethod === "Tarjeta de crédito";
+      }
+      return paymentMethod === selectedPaymentType;
+    });
   }, [transactionsTable, selectedPaymentType]);
+
+
 
   const requestExcel = () => {
     if (dateRange?.from == undefined || dateRange?.to == undefined) return;

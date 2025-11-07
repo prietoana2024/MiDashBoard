@@ -21,6 +21,7 @@ import CurrencyDenomination from "./pages/masters/CurrencyDenomination";
 import Alerts from "./pages/alerts/Alerts";
 import { useSelector } from "react-redux";
 import Reports from "./pages/dashboard/reports/Reports";
+import Transacciones from "./pages/dashboard/transacciones/Transacciones";
 
 const Main = () => {
   const state = useSelector((state) => state.login);
@@ -117,6 +118,11 @@ const Main = () => {
                 path="/Reports"
                 exact={true}
                 Component={Reports}
+              />
+              <Route
+                path="/Transacciones"
+                exact={true}
+                Component={Transacciones}
               />
               <Route path="/Unauthorized" exact={true} Component={Error401} />
               <Route path="*" exact={true} Component={Error404} />
